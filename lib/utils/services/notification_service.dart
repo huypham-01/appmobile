@@ -195,7 +195,7 @@ class MaintenanceNotificationService {
   static Future<void> scheduleDailyAlarms() async {
     if (Platform.isAndroid) {
       try {
-        await _channel.invokeMethod("scheduleAlarm", {"hour": 7, "minute": 0});
+        await _channel.invokeMethod("scheduleAlarm", {"hour": 11, "minute": 0});
         await _channel.invokeMethod("scheduleAlarm", {"hour": 19, "minute": 0});
 
         print("⏰ Android: scheduled alarms for 7:00 & 19:00");
@@ -258,6 +258,7 @@ class MaintenanceNotificationService {
   // ============================================================
   static Future<void> testNow() async {
     final msg = await _getSummaryMessage();
+    print(msg);
 
     const details = NotificationDetails(
       android: AndroidNotificationDetails(

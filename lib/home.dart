@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mobile/l10n/generated/app_localizations.dart';
+import 'package:mobile/utils/services/notification_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mobile/utils/routes/fmcs_routes.dart';
 import 'package:mobile/utils/routes/Ems_routes.dart';
@@ -110,20 +112,23 @@ class _HomeState extends State<Home> {
           Navigator.pushNamed(context, FmcsRoutes.home);
         },
       },
-      // {
-      //   "title": "test",
-      //   "description": "test",
-      //   "icon": Icons.apartment_rounded,
-      //   "color": Colors.orange,
-      //   "onTap": () async {
-      //     await MaintenanceNotificationService.fetchAndSaveMaintenanceData();
-
-      //     // 2. Hẹn giờ báo 7:00 và 19:00 mỗi ngày
-      //     await MaintenanceNotificationService.scheduleDailyAlarms();
-
-      //     await MaintenanceNotificationService.testAfterSeconds(15);
-      //   },
-      // },
+      {
+        "title": "test",
+        "description": "test",
+        "icon": Icons.apartment_rounded,
+        "color": Colors.orange,
+        "onTap": () async {
+          // await MaintenanceNotificationService.testNow();
+          print("🔔 Tapped");
+          await FlutterLocalNotificationsPlugin().show(
+            0,
+            "Hello",
+            "Test",
+            const NotificationDetails(iOS: DarwinNotificationDetails()),
+          );
+          print("🔔 show() called");
+        },
+      },
     ];
 
     return Scaffold(
