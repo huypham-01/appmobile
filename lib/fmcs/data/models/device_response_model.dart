@@ -96,6 +96,7 @@ class DeviceResponseModel {
 class DeviceItem {
   final String system;
   final String location;
+  final int? locationId; // thêm ID
   final String deviceId;
   final String frequency;
   final String? tempLower;
@@ -128,6 +129,7 @@ class DeviceItem {
   DeviceItem({
     required this.system,
     required this.location,
+    this.locationId,
     required this.deviceId,
     required this.frequency,
     this.tempLower,
@@ -193,6 +195,8 @@ class DeviceItem {
       action: false, // gán sau khi gọi API action
     );
   }
+
+  toJson() {}
 }
 
 class SystemCategory {
@@ -289,6 +293,8 @@ class LocationItem {
       description: json['description'],
     );
   }
+
+  toJson() {}
 }
 
 class LocationResponse {

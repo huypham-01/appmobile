@@ -56,7 +56,7 @@ class _HomeFmcsState extends State<HomeFmcs> {
   @override
   void initState() {
     super.initState();
-    _apiService = FmcsApiService(baseUrl: 'http://192.168.110.2/web_develop');
+    _apiService = FmcsApiService();
     _loadData(showLoading: true); // 👈 Lần đầu hiển thị loading
 
     // Auto refresh mỗi 30 giây - không hiển thị loading

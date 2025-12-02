@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:mobile/ems/data/ems_api_service.dart';
 import 'package:mobile/ems/data/models/machine_model.dart';
 import 'package:mobile/l10n/generated/app_localizations.dart';
+import 'package:mobile/utils/constants.dart';
 import 'package:mobile/utils/routes/ems_routes.dart';
 
 class FamilyDetail extends StatefulWidget {
@@ -58,10 +59,7 @@ class _FamilyDetailState extends State<FamilyDetail>
     fromDate = toDate.subtract(const Duration(days: 1));
 
     // Initialize API service with your base URL
-    _apiService = ProductionApiService(
-      baseUrl:
-          'http://192.168.110.2/web_develop/ems/api.php?action=get_output_report_bulk', // Thay bằng URL thật của bạn
-    );
+    _apiService = ProductionApiService();
 
     // Load initial data
     _loadData();

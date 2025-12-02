@@ -909,13 +909,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get englishDisplay => '🇺🇸 English';
 
   @override
-  String get chinese => 'Chinese';
+  String get chinese => 'Simplified Chinese';
 
   @override
   String get chineseDisplay => '🇨🇳 中文（简体）';
 
   @override
-  String get taiwanese => 'Taiwanese';
+  String get taiwanese => 'Traditional Chinese';
 
   @override
   String get taiwaneseDisplay => '🇹🇼 中文（繁體）';
@@ -1009,4 +1009,38 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statusDisconnected => 'Disconnected';
+
+  @override
+  String get updateAvailableTitle => 'A new update is available!';
+
+  @override
+  String updateDialogTitle(Object version) {
+    return 'Update $version';
+  }
+
+  @override
+  String get updateDescription => 'A new update is available!';
+
+  @override
+  String get updateLater => 'Later';
+
+  @override
+  String get updateNow => 'Update now';
+
+  @override
+  String get downloadingTitle => 'Downloading...';
+
+  @override
+  String get cmmsDescription => 'Computerized Maintenance Management System';
+
+  @override
+  String get emsDescription => 'Equipment Management System';
+
+  @override
+  String get fmcsDescription => 'Facility Management Control System';
+
+  @override
+  String appVersion(Object appVersion) {
+    return 'Version $appVersion';
+  }
 }

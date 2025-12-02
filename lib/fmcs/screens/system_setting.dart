@@ -633,6 +633,7 @@ class _SystemSettingState extends State<SystemSetting> {
                                     );
                                   }
                                 }
+                                Navigator.pop(context);
                               },
 
                               style: ElevatedButton.styleFrom(
@@ -1062,8 +1063,8 @@ class _SystemSettingState extends State<SystemSetting> {
                             const SizedBox(width: 10),
                             ElevatedButton(
                               onPressed: () async {
+
                                 if (selectedSystem.isEmpty ||
-                                    selectedLocationItem == null ||
                                     deviceIdController.text.isEmpty ||
                                     frequencyController.text.isEmpty ||
                                     freqCheckLimitController.text.isEmpty) {
@@ -1081,7 +1082,7 @@ class _SystemSettingState extends State<SystemSetting> {
                                 }
                                 final updatedData = {
                                   "system": selectedSystem,
-                                  "location": selectedLocationItem!.id
+                                  "location": selectedLocationItem?.id
                                       .toString(), // Sử dụng ID
                                   "device_id": deviceIdController.text,
                                   "frequency": frequencyController.text,
@@ -1113,12 +1114,12 @@ class _SystemSettingState extends State<SystemSetting> {
                                     hasChanges = true;
                                   });
                                   widget.onDataChanged();
+
                                   await Future.delayed(
                                     const Duration(milliseconds: 300),
                                   );
 
                                   if (mounted) {
-                                    Navigator.pop(context);
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Row(
@@ -1144,8 +1145,8 @@ class _SystemSettingState extends State<SystemSetting> {
                                         ),
                                       ),
                                     );
-                                  } else {
                                     Navigator.pop(context);
+                                  } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Row(
@@ -1185,6 +1186,8 @@ class _SystemSettingState extends State<SystemSetting> {
                                     ),
                                   );
                                 }
+
+                                Navigator.pop(context);
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.blue,

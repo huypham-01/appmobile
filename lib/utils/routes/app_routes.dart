@@ -46,17 +46,19 @@ class AppRoutes {
       case home:
         print('✅ [AppRoutes] Navigating to Home');
         return MaterialPageRoute(builder: (_) => const Home());
+      case login:
+        print('✅ [AppRoutes] Navigating to Login');
+        return MaterialPageRoute(builder: (_) => const LoginScreen());
 
       case onboarding:
         print('✅ [AppRoutes] Navigating to Onboarding');
         return MaterialPageRoute(builder: (_) => const OnboardingScreen());
 
-      case login:
-        final keyW = settings.arguments as String? ?? "cmms"; // ✅ Nhận tham số
-        return MaterialPageRoute(
-          builder: (_) => LoginScreen(keyW: keyW),
-          settings: settings,
-        );
+      // case login:
+      //   return MaterialPageRoute(
+      //     builder: (_) => LoginScreen(keyW: keyW),
+      //     settings: settings,
+      //   );
 
       case changepassword:
         print('✅ [AppRoutes] Navigating to ChangePassword');

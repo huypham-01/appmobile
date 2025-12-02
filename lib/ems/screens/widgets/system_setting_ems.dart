@@ -425,7 +425,7 @@ class _SystemMachineState extends State<SystemMachine> {
                           const SizedBox(width: 10),
                           ElevatedButton(
                             onPressed: () async {
-                              // 🟢 Gom dữ liệu và gửi API
+                              //TODO
                               final data = {
                                 'action': isEdit ? 'update' : 'add',
                                 if (isEdit) 'id': device?.id.toString(),
@@ -1343,7 +1343,9 @@ class _SystemMachineState extends State<SystemMachine> {
                                       SnackBar(
                                         content: Text(
                                           result["message"] ??
-                                              "Delete device failed",
+                                              AppLocalizations.of(
+                                                context,
+                                              )!.deleteFailedMsg,
                                         ),
                                         backgroundColor: Colors.red,
                                       ),

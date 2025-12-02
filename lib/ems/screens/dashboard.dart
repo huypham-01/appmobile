@@ -199,14 +199,14 @@ class _DashboardState extends State<Dashboard>
           children: [
             Text(_errorMessage!),
             const SizedBox(height: 16),
-            ElevatedButton(onPressed: _loadData, child: const Text('Thử lại')),
+            ElevatedButton(onPressed: _loadData, child: Text(AppLocalizations.of(context)!.retry)),
           ],
         ),
       );
     }
 
     if (_reportData == null) {
-      return const Center(child: Text('Không có dữ liệu'));
+      return Center(child: Text(AppLocalizations.of(context)!.noDataFound));
     }
 
     return TabBarView(

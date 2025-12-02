@@ -132,8 +132,8 @@
   "medium": "Trung bình",
   "high": "Cao",
   "urgent": "Khẩn cấp",
-  "lower": "Thấp hơn",
-  "upper": "Cao hơn",
+  "lower": "Thấp",
+  "upper": "Cao",
   "edit" : "Chỉnh sửa",
   "delete" : "Xóa",
   "machineIDuniq" : "ID Máy (Duy nhất)",
@@ -235,7 +235,7 @@
   "updatedLabel": "Đã cập nhật",
   "dailyInspectionTitle": "Kiểm tra hàng ngày",
   "needToInspect": "Cần kiểm tra",
-  "maintenanceMachineTitle": "Bảo trì máy móc",
+  "maintenanceMachineTitle": "Bảo trì máy",
   "scheduledToday": "Lên lịch hôm nay",
   "equipmentsTitle": "Thiết bị",
   "overdueTitle": "Quá hạn",
@@ -336,6 +336,17 @@
 
   "tabIssue": "Vấn đề",
   "statusConnected": "Đang kết nối",
-  "statusDisconnected": "Mất kết nối"
+  "statusDisconnected": "Mất kết nối",
+
+  "updateAvailableTitle": "Đã có bản cập nhật mới!",
+  "updateDialogTitle": "Cập nhật {version}",
+  "updateDescription": "Đã có bản cập nhật mới!",
+  "updateLater": "Để sau",
+  "updateNow": "Cập nhật ngay",
+  "downloadingTitle": "Đang tải xuống...",
+  "cmmsDescription": "Hệ thống quản lý bảo trì",
+  "emsDescription": "Hệ thống quản lý thiết bị",
+  "fmcsDescription": "Hệ thống kiểm soát và quản lý cơ sở hạ tầng",
+  "appVersion": "Phiên bản {appVersion}"
 
 }

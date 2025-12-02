@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:mobile/utils/services/notification_service.dart';
+import 'package:mobile/cmms/data/mock_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // import '../../utils/constants.dart';
@@ -16,6 +16,10 @@ class InspectionService {
     DateTime? dateFrom,
     DateTime? dateTo,
   }) async {
+    if (useMock) {
+      final list = mockInspectionJson['data'] as List;
+      return list.map((e) => TaskEquipmentToday.fromJson(e)).toList();
+    }
     // Format dates to yyyy-MM-dd format
     final dateFormat = DateFormat('yyyy-MM-dd');
     final fromDate = dateFrom != null
@@ -26,7 +30,7 @@ class InspectionService {
         : dateFormat.format(DateTime.now());
 
     final url =
-        "$baseUrl/cip3/index.php?c=DailyTaskController&m=get_today_equipments&date_from=$fromDate&date_to=$toDate";
+        "$baseUrl/cmms/cip3/index.php?c=DailyTaskController&m=get_today_equipments&date_from=$fromDate&date_to=$toDate";
     final token = await ApiService.getToken();
     final res = await http.get(
       Uri.parse(url),
@@ -51,8 +55,12 @@ class InspectionService {
     DateTime? dateFrom,
     DateTime? dateTo,
   }) async {
+    if (useMock) {
+      final list = (mockMaintenanceJson['data'] as List);
+      return list.map((e) => TaskMaintenance.fromJson(e)).toList();
+    }
     final url =
-        "$baseUrl/cip3/index.php?c=MaintenanceController&m=getMachineWithMaintenancePlan";
+        "$baseUrl/cmms/cip3/index.php?c=MaintenanceController&m=getMachineWithMaintenancePlan";
     final token = await ApiService.getToken();
     final res = await http.get(
       Uri.parse(url),
@@ -75,7 +83,7 @@ class InspectionService {
   // static Future<int> fetchInspectionCount() async {
   //   final token = await ApiService.getToken();
   //   final url =
-  //       "$baseUrl/cip3/index.php?c=DailyTaskController&m=get_today_equipments";
+  //       "$baseUrl/cmms/cip3/index.php?c=DailyTaskController&m=get_today_equipments";
   //   final res = await http.get(
   //     Uri.parse(url),
   //     headers: {'Authorization': 'Bearer $token'},
@@ -91,7 +99,7 @@ class InspectionService {
   // static Future<int> fetchMaintenanceCount() async {
   //   final token = await ApiService.getToken();
   //   final url =
-  //       "$baseUrl/cip3/index.php?c=DailyTaskController&m=get_today_equipments";
+  //       "$baseUrl/cmms/cip3/index.php?c=DailyTaskController&m=get_today_equipments";
   //   final res = await http.get(
   //     Uri.parse(url),
   //     headers: {'Authorization': 'Bearer $token'},
@@ -111,6 +119,11 @@ class InspectionService {
     DateTime dateFrom,
     DateTime dateTo,
   ) async {
+    // Bật mock thì trả về mock luôn
+    if (useMock) {
+      final list = mockEquipmentDetailJson['data'] as List;
+      return list.map((e) => DetailTaskEquipment.fromJson(e)).toList();
+    }
     final dateFormat = DateFormat('yyyy-MM-dd');
     final fromDate = dateFrom != null
         ? dateFormat.format(dateFrom)
@@ -121,7 +134,7 @@ class InspectionService {
     final token = await ApiService.getToken();
     final response = await http.get(
       Uri.parse(
-        "$baseUrl/cip3/index.php?c=DailyTaskController&m=getDailyTasksByEquipment&equipment_id=$uuid&dateFrom=$fromDate&dateTo=$toDate",
+        "$baseUrl/cmms/cip3/index.php?c=DailyTaskController&m=getDailyTasksByEquipment&equipment_id=$uuid&dateFrom=$fromDate&dateTo=$toDate",
       ),
       headers: {'Authorization': 'Bearer $token'},
     );
@@ -138,10 +151,14 @@ class InspectionService {
   static Future<List<DetailTaskMaintenance>> fetchMaintenanceByUuid(
     String uuid,
   ) async {
+    if (useMock) {
+      final list = mockMaintenanceDetailJson['data'] as List;
+      return list.map((e) => DetailTaskMaintenance.fromJson(e)).toList();
+    }
     final token = await ApiService.getToken();
     final response = await http.get(
       Uri.parse(
-        "$baseUrl/cip3/index.php?c=MaintenanceController&m=getMachineTaskById&equipment_id=$uuid",
+        "$baseUrl/cmms/cip3/index.php?c=MaintenanceController&m=getMachineTaskById&equipment_id=$uuid",
       ),
       headers: {'Authorization': 'Bearer $token'},
     );
@@ -155,10 +172,14 @@ class InspectionService {
   }
 
   static Future<List<TaskOverDue>> fetchOverDue() async {
+    if (useMock) {
+      final list = mockOverdueJson['data'] as List;
+      return list.map((e) => TaskOverDue.fromJson(e)).toList();
+    }
     final token = await ApiService.getToken();
     final response = await http.get(
       Uri.parse(
-        "$baseUrl/cip3/index.php?c=EquipmentController&m=getMachineHaveOverdueTask",
+        "$baseUrl/cmms/cip3/index.php?c=EquipmentController&m=getMachineHaveOverdueTask",
       ),
       headers: {'Authorization': 'Bearer $token'},
     );
@@ -172,10 +193,14 @@ class InspectionService {
   }
 
   static Future<List<TaskOverDueDetail>> fetchOverDueDetail(String uuid) async {
+    if (useMock) {
+      final list = mockOverdueDetailJson['data'] as List;
+      return list.map((e) => TaskOverDueDetail.fromJson(e)).toList();
+    }
     final token = await ApiService.getToken();
     final response = await http.get(
       Uri.parse(
-        "$baseUrl/cip3/index.php?c=EquipmentController&m=getOverdueTasksByEquipment&equipment_id=$uuid",
+        "$baseUrl/cmms/cip3/index.php?c=EquipmentController&m=getOverdueTasksByEquipment&equipment_id=$uuid",
       ),
       headers: {'Authorization': 'Bearer $token'},
     );
@@ -204,7 +229,7 @@ class InspectionService {
   //   try {
   //     final equipmentResponse = await http.get(
   //       Uri.parse(
-  //         '$baseUrl/cip3/index.php?c=MaintenanceController&m=getMachineWithMaintenancePlan',
+  //         '$baseUrl/cmms/cip3/index.php?c=MaintenanceController&m=getMachineWithMaintenancePlan',
   //       ),
   //     );
   //     if (equipmentResponse.statusCode != 200) {
@@ -224,7 +249,7 @@ class InspectionService {
   //     for (var equipment in equipmentList) {
   //       final taskResponse = await http.get(
   //         Uri.parse(
-  //           '$baseUrl/cip3/index.php?c=MaintenanceController&m=getMachineTaskById&equipment_id=${equipment.uuid}',
+  //           '$baseUrl/cmms/cip3/index.php?c=MaintenanceController&m=getMachineTaskById&equipment_id=${equipment.uuid}',
   //         ),
   //       );
   //       if (taskResponse.statusCode != 200) continue;
@@ -267,7 +292,7 @@ class QuestionTaskService {
   Future<QuestionTask> fetchQuestionTask(String uuid) async {
     final token = await ApiService.getToken();
     final response = await http.get(
-      Uri.parse("$baseUrl/forms/task/$uuid"),
+      Uri.parse("$baseUrl/cmms/forms/task/$uuid"),
       headers: {'Authorization': 'Bearer $token'},
     );
 
@@ -302,7 +327,7 @@ class FormService {
       };
 
       final response = await http.post(
-        Uri.parse("$baseUrl/forms/submit"),
+        Uri.parse("$baseUrl/cmms/forms/submit"),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer ${await ApiService.getToken()}",

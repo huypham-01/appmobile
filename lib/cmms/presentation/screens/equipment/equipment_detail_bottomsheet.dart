@@ -310,7 +310,7 @@ class _EquipmentDetailBottomSheetState extends State<EquipmentDetailBottomSheet>
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.only(left: 8, right: 8, top: 2, bottom: 2),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(8),
@@ -352,7 +352,7 @@ class _EquipmentDetailBottomSheetState extends State<EquipmentDetailBottomSheet>
                   Text(
                     value,
                     style: const TextStyle(
-                      fontSize: 14,
+                      fontSize: 13,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
                     ),

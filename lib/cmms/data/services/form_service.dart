@@ -3,6 +3,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:mobile/cmms/data/mock_data.dart';
 import 'package:mobile/utils/constants.dart';
 import '../models/form_item.dart';
 import 'api_service.dart';
@@ -10,16 +11,41 @@ import 'api_service.dart';
 class FormService {
   static String _geturl(String keyW) {
     if (keyW == "daily") {
-      return "$baseUrl/cip3/index.php?c=DailyTaskController&m=getWiById&id=";
+      return "$baseUrl/cmms/cip3/index.php?c=DailyTaskController&m=getWiById&id=";
     } else if (keyW == "maintenance") {
-      return "$baseUrl/cip3/index.php?c=MaintenanceController&m=getWIMaintenance&uuid=";
+      return "$baseUrl/cmms/cip3/index.php?c=MaintenanceController&m=getWIMaintenance&uuid=";
     } else {
       return "";
     }
   }
 
+  static FormResponse _mockLoadForm() {
+    final dataList = mockFormJson['data'] as List<dynamic>;
+    if (dataList.isEmpty) {
+      return FormResponse.empty();
+    }
+
+    final detail = dataList[0];
+
+    final schemaString = detail['schema'] ?? '[]';
+    final schemaJson = jsonDecode(schemaString);
+
+    final steps = (schemaJson as List)
+        .map((e) => FormStepModel.fromJson(e))
+        .toList();
+
+    final wiCode = detail['code'] ?? '';
+    final formUuid = detail['uuid'] ?? '';
+
+    return FormResponse.success(steps: steps, wiCode: wiCode, uuid: formUuid);
+  }
+
   static Future<FormResponse> loadFormById(String keyW, String uuid) async {
     try {
+      // ========== MOCK MODE ==========
+      if (useMock) {
+        return _mockLoadForm();
+      }
       final response = await http.get(Uri.parse("${_geturl(keyW)}$uuid"));
 
       if (response.statusCode == 200) {
@@ -60,9 +86,9 @@ class FormService {
 
   static String _postUrl(String keyW) {
     if (keyW == "daily") {
-      return "$baseUrl/cip3/index.php?c=DailyTaskController&m=doDailyTask";
+      return "$baseUrl/cmms/cip3/index.php?c=DailyTaskController&m=doDailyTask";
     } else {
-      return "$baseUrl/cip3/index.php?c=MaintenanceController&m=doDailyTask";
+      return "$baseUrl/cmms/cip3/index.php?c=MaintenanceController&m=doDailyTask";
     }
   }
 
@@ -114,7 +140,7 @@ class FormService {
 
   //     final response = await http.post(
   //       Uri.parse(
-  //         "$baseUrl/cip3/index.php?c=DailyTaskController&m=doDailyTask",
+  //         "$baseUrl/cmms/cip3/index.php?c=DailyTaskController&m=doDailyTask",
   //       ),
   //       headers: {"Content-Type": "application/json"},
   //       body: jsonEncode(formData),

@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:mobile/utils/routes/fmcs_routes.dart';
 import 'package:mobile/utils/routes/Ems_routes.dart';
 import 'package:mobile/utils/routes/app_routes.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../../main.dart'; // để gọi changeLanguage()
 
 class Home extends StatefulWidget {
@@ -17,17 +18,27 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   String _selectedLanguage = "";
+  String _appVersion = "";
 
   @override
   void initState() {
     super.initState();
     _loadLanguage();
+    _loadAppVersion();
   }
 
   Future<void> _loadLanguage() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _selectedLanguage = prefs.getString("selectedLanguage") ?? "";
+    });
+  }
+
+  Future<void> _loadAppVersion() async {
+    final packageInfo = await PackageInfo.fromPlatform();
+    setState(() {
+      _appVersion = "${packageInfo.version} (${packageInfo.buildNumber})";
+      // Hoặc chỉ hiển thị version: _appVersion = packageInfo.version;
     });
   }
 
@@ -41,10 +52,22 @@ class _HomeState extends State<Home> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _languageOption("Vietnamese", const Locale('vi')),
-              _languageOption("English", const Locale('en')),
-              _languageOption("Chinese", const Locale('zh')),
-              _languageOption("Taiwanese", const Locale('zh', 'TW')),
+              _languageOption(
+                AppLocalizations.of(context)!.vietnamese,
+                const Locale('vi'),
+              ),
+              _languageOption(
+                AppLocalizations.of(context)!.english,
+                const Locale('en'),
+              ),
+              _languageOption(
+                AppLocalizations.of(context)!.chinese,
+                const Locale('zh'),
+              ),
+              _languageOption(
+                AppLocalizations.of(context)!.taiwanese,
+                const Locale('zh', 'TW'),
+              ),
             ],
           ),
         );
@@ -54,13 +77,7 @@ class _HomeState extends State<Home> {
 
   Widget _languageOption(String label, Locale locale) {
     return RadioListTile<String>(
-      title: Row(
-        children: [
-          // Image.asset(flagPath, width: 28, height: 18, fit: BoxFit.cover),
-          // const SizedBox(width: 10),
-          Text(label),
-        ],
-      ),
+      title: Text(label),
       value: label,
       groupValue: _selectedLanguage,
       onChanged: (value) async {
@@ -82,9 +99,9 @@ class _HomeState extends State<Home> {
     final List<Map<String, dynamic>> systems = [
       {
         "title": "CMMS",
-        "description": "Computerized Maintenance Management System",
-        "icon": Icons.settings,
-        "color": Colors.blue,
+        "description": AppLocalizations.of(context)!.cmmsDescription,
+        "icon": Icons.build_outlined,
+        "color": Colors.blue.shade50,
         "onTap": () {
           Navigator.pushNamedAndRemoveUntil(
             context,
@@ -96,157 +113,152 @@ class _HomeState extends State<Home> {
       },
       {
         "title": "EMS",
-        "description": "Equipment Management System",
-        "icon": Icons.energy_savings_leaf_outlined,
-        "color": Colors.green,
+        "description": AppLocalizations.of(context)!.emsDescription,
+        "icon": Icons.factory_outlined,
+        "color": Colors.blue.shade50,
         "onTap": () {
           Navigator.pushNamed(context, EmsRoutes.home);
         },
       },
       {
         "title": "FMCS",
-        "description": "Facility Management Control System",
-        "icon": Icons.apartment_rounded,
-        "color": Colors.orange,
+        "description": AppLocalizations.of(context)!.fmcsDescription,
+        "icon": Icons.devices_other_outlined,
+        "color": Colors.blue.shade50,
         "onTap": () {
           Navigator.pushNamed(context, FmcsRoutes.home);
-        },
-      },
-      {
-        "title": "test",
-        "description": "test",
-        "icon": Icons.apartment_rounded,
-        "color": Colors.orange,
-        "onTap": () async {
-          // await MaintenanceNotificationService.testNow();
-          print("🔔 Tapped");
-          await FlutterLocalNotificationsPlugin().show(
-            0,
-            "Hello",
-            "Test",
-            const NotificationDetails(iOS: DarwinNotificationDetails()),
-          );
-          print("🔔 show() called");
         },
       },
     ];
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 20,
-            mainAxisSpacing: 20,
-            childAspectRatio: 0.85,
-          ),
-          itemCount: systems.length,
-          itemBuilder: (context, index) {
-            final item = systems[index];
-
-            return GestureDetector(
-              onTap: item["onTap"],
-              child: Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                elevation: 8,
-                shadowColor: Colors.black26,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          item["color"].withOpacity(0.9),
-                          item["color"].withOpacity(0.6),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Hero(
-                          tag: item["title"],
-                          child: Icon(
-                            item["icon"],
-                            size: 58,
-                            color: Colors.white,
-                            shadows: const [
-                              Shadow(
-                                blurRadius: 8,
-                                color: Colors.black38,
-                                offset: Offset(2, 2),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        Text(
-                          item["title"],
-                          style: const TextStyle(
-                            fontSize: 20,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 1.1,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          item["description"],
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.white.withOpacity(0.9),
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
+      backgroundColor: Colors.grey.shade50,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            children: [
+              // Grid Systems
+              Expanded(
+                child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 0.9,
                   ),
+                  itemCount: systems.length,
+                  itemBuilder: (context, index) {
+                    final item = systems[index];
+
+                    return GestureDetector(
+                      onTap: item["onTap"],
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: Colors.grey.shade300,
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.shade100,
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: item["color"],
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                item["icon"],
+                                size: 40,
+                                color: Colors.blue.shade300,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              item["title"],
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.grey.shade800,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
+                              child: Text(
+                                item["description"],
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey.shade600,
+                                  height: 1.3,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
-            );
-          },
+
+              // Version Info
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  AppLocalizations.of(context)!.appVersion(_appVersion),
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
 
       // ---------- BOTTOM BAR ----------
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         decoration: BoxDecoration(
           color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
-        ),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 18),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(20),
+          border: Border(
+            top: BorderSide(color: Colors.grey.shade300, width: 1),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _BottomButton(
-                icon: Icons.language,
-                label: AppLocalizations.of(context)!.language,
-                onTap: () => _showLanguageDialog(context),
-              ),
-              _BottomButton(
-                icon: Icons.help_outline,
-                label: AppLocalizations.of(context)!.bottomButtonInstructions,
-                onTap: () => Navigator.pushNamed(context, AppRoutes.onboarding),
-              ),
-            ],
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _BottomButton(
+                  icon: Icons.language_outlined,
+                  label: AppLocalizations.of(context)!.language,
+                  onTap: () => _showLanguageDialog(context),
+                ),
+                Container(width: 1, height: 40, color: Colors.grey.shade300),
+                _BottomButton(
+                  icon: Icons.help_outline,
+                  label: AppLocalizations.of(context)!.bottomButtonInstructions,
+                  onTap: () =>
+                      Navigator.pushNamed(context, AppRoutes.onboarding),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -269,18 +281,22 @@ class _BottomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(12),
       onTap: onTap,
-      child: SizedBox(
-        width: 90,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 26, color: Colors.blueGrey),
-            const SizedBox(height: 4),
+            Icon(icon, size: 24, color: Colors.grey.shade700),
+            const SizedBox(height: 6),
             Text(
               label,
-              style: const TextStyle(fontSize: 12, color: Colors.black87),
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade700,
+                fontWeight: FontWeight.w500,
+              ),
               textAlign: TextAlign.center,
             ),
           ],

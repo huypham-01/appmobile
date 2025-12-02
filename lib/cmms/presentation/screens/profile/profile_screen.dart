@@ -16,12 +16,22 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   String _selectedLanguage = '';
   bool _pushNotifications = true;
-  bool _darkMode = false;
+  String _username = '';
 
   @override
   void initState() {
     super.initState();
     _loadLanguagePreference();
+    _loadUserInfo();
+  }
+
+  Future<void> _loadUserInfo() async {
+    final info = await ApiService.getUserInfo();
+    if (info != null) {
+      setState(() {
+        _username = info["username"] ?? "";
+      });
+    }
   }
 
   /// Đọc ngôn ngữ đã lưu
@@ -83,7 +93,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: 12),
         _buildLanguageSection(localizations),
         const SizedBox(height: 12),
-        _buildNotificationSection(localizations),
+        // _buildNotificationSection(localizations),
         const SizedBox(height: 12),
         _buildActionButtons(localizations),
       ],
@@ -111,7 +121,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Expanded(
               child: Column(
                 children: [
-                  _buildNotificationSection(localizations),
+                  // _buildNotificationSection(localizations),
                   // const SizedBox(height: 16),
                   // _buildAdditionalFeaturesSection(),
                 ],
@@ -165,17 +175,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "test User",
+                  _username.isNotEmpty ? _username : "Unknown User",
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "test maintenanceTechnician",
-                  style: const TextStyle(fontSize: 14, color: Colors.white70),
                 ),
               ],
             ),

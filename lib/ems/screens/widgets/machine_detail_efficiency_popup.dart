@@ -107,7 +107,7 @@ class _MachineDetailEfficiencyPopupState
       }
     } catch (e) {
       setState(() {
-        errorMessage = 'Error: $e';
+        errorMessage = 'Error';
         isLoading = false;
       });
     }
@@ -147,16 +147,16 @@ class _MachineDetailEfficiencyPopupState
         'family': machine.family,
         'process': machine.process ?? 'N/A',
         'moldCavity': machine.moldCavity?.toString() ?? '0',
-        'output': machine.output?.toString() ?? '0',
+        'output': machine.output?.toInt(),
         'actualCavity': machine.actualCavity.toString(),
-        'capacity': machine.capacity?.toStringAsFixed(2) ?? '0.00',
+        'capacity': machine.capacity?.toDouble() ?? 0.00,
         'efficiency': '${efficiency.toStringAsFixed(2)}%',
-        'currentCycle': machine.currentCycle?.toStringAsFixed(2) ?? '0.00',
+        'currentCycle': machine.currentCycle.toStringAsFixed(2),
         'target': machine.target?.toStringAsFixed(2) ?? '0.00',
         'upperLimit': machine.upperLimit?.toStringAsFixed(2) ?? '0.00',
         'lowerLimit': machine.lowerLimit?.toStringAsFixed(2) ?? '0.00',
-        'totalLostPcs': machine.totalLostPcs?.toStringAsFixed(0) ?? '0',
-        'lostTime': '${machine.lostTime?.toStringAsFixed(0) ?? '0'} min',
+        'totalLostPcs': machine.totalLostPcs?.toDouble(),
+        'lostTime': '${formatNumber(machine.lostTime)} mins',
         'efficiencyColor': efficiencyColor,
         'efficiencyValue': efficiency,
       };
@@ -699,16 +699,17 @@ class _MachineDetailEfficiencyPopupState
                       Expanded(
                         child: _buildInfoItem(
                           AppLocalizations.of(context)!.capacity,
-                          item['capacity'],
-                          // formatNumber(item['capacity'])
-                          
+
+                          // item['capacity'],
+                          formatNumber(item['capacity']),
                         ),
                       ),
 
                       Expanded(
                         child: _buildInfoItem(
                           AppLocalizations.of(context)!.outputPcs,
-                          item['output'],
+                          // item['output'],
+                          formatNumber(item['output']),
                         ),
                       ),
                     ],
@@ -755,7 +756,8 @@ class _MachineDetailEfficiencyPopupState
                       Expanded(
                         child: _buildInfoItem(
                           AppLocalizations.of(context)!.lostPcs,
-                          item['totalLostPcs'],
+                          // item['totalLostPcs'].toString(),
+                          formatNumber(item['totalLostPcs']),
                         ),
                       ),
                       Expanded(

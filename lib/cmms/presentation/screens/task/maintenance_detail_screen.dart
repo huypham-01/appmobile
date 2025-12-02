@@ -320,42 +320,42 @@ class _TaskDetailScreenState extends State<MaintenanceDetailScreen> {
                               ],
                             ),
                           ),
-                          SizedBox(width: 5),
+                          // SizedBox(width: 5),
 
                           // Status badge for completed tasks
                           // if (isCompleted)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 5,
-                            ),
-                            decoration: BoxDecoration(
-                              color: _getStatusColor(task.status),
-                              borderRadius: BorderRadius.circular(6),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: _getStatusColor(
-                                    task.status,
-                                  ).withOpacity(0.3),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  task.status,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 11,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                          // Container(
+                          //   padding: const EdgeInsets.symmetric(
+                          //     horizontal: 8,
+                          //     vertical: 5,
+                          //   ),
+                          //   decoration: BoxDecoration(
+                          //     color: _getStatusColor(task.status),
+                          //     borderRadius: BorderRadius.circular(6),
+                          //     boxShadow: [
+                          //       BoxShadow(
+                          //         color: _getStatusColor(
+                          //           task.status,
+                          //         ).withOpacity(0.3),
+                          //         blurRadius: 4,
+                          //         offset: const Offset(0, 2),
+                          //       ),
+                          //     ],
+                          //   ),
+                          //   child: Row(
+                          //     mainAxisSize: MainAxisSize.min,
+                          //     children: [
+                          //       Text(
+                          //         task.status,
+                          //         style: const TextStyle(
+                          //           color: Colors.white,
+                          //           fontWeight: FontWeight.w600,
+                          //           fontSize: 11,
+                          //         ),
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
                         ],
                       ),
 

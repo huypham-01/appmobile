@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:mobile/utils/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -72,7 +73,7 @@ class MaintenanceNotificationService {
       // API 1
       final res1 = await http.get(
         Uri.parse(
-          "http://192.168.110.2/web_develop/cmms/cip3/index.php"
+          "$baseUrl/cmms/cip3/index.php"
           "?c=MaintenanceController&m=getMachineWithMaintenancePlan",
         ),
       );
@@ -92,7 +93,7 @@ class MaintenanceNotificationService {
         // API 2
         final res2 = await http.get(
           Uri.parse(
-            "http://192.168.110.2/web_develop/cmms/cip3/index.php"
+            "$baseUrl/cmms/cip3/index.php"
             "?c=MaintenanceController&m=getNextCountAndEstDate"
             "&equipment_id=$id",
           ),
@@ -195,7 +196,7 @@ class MaintenanceNotificationService {
   static Future<void> scheduleDailyAlarms() async {
     if (Platform.isAndroid) {
       try {
-        await _channel.invokeMethod("scheduleAlarm", {"hour": 11, "minute": 0});
+        await _channel.invokeMethod("scheduleAlarm", {"hour": 7, "minute": 0});
         await _channel.invokeMethod("scheduleAlarm", {"hour": 19, "minute": 0});
 
         print("⏰ Android: scheduled alarms for 7:00 & 19:00");

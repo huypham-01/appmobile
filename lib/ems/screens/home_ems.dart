@@ -330,18 +330,15 @@ class _HomeEmsState extends State<HomeEms> with SingleTickerProviderStateMixin {
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     if (constraints.maxWidth < 600) {
-                      return Wrap(
-                        spacing: 6,
-                        runSpacing: 6,
-                        alignment: WrapAlignment.center,
-                        children: _buildAllChips(stats, small: true)
-                            .map(
-                              (chip) => SizedBox(
-                                width: (constraints.maxWidth - 32) / 3,
-                                child: chip,
-                              ),
-                            )
-                            .toList(),
+                      return GridView.count(
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        crossAxisCount: 3, // 3 cột → 2 hàng tự chia đẹp
+                        mainAxisSpacing: 4,
+                        crossAxisSpacing: 4,
+                        childAspectRatio:
+                            4.4, // chỉnh tỉ lệ chip (nếu chip quá rộng hoặc cao thì chỉnh số này)
+                        children: _buildAllChips(stats, small: true),
                       );
                     } else {
                       return Row(

@@ -1,13 +1,15 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:jwt_decode/jwt_decode.dart';
+import 'package:mobile/fmcs/data/mock_data2.dart';
+import 'package:mobile/utils/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiServiceAuth {
   static const Duration _timeout = Duration(seconds: 30);
   static Future<List<String>> getPermissions(String username) async {
     final url =
-        "http://192.168.110.2/web_develop/iam/cip3/?c=PermissionController&m=getPermissionByUsername";
+        "$baseUrl/iam/cip3/?c=PermissionController&m=getPermissionByUsername";
 
     try {
       final response = await http
@@ -36,10 +38,12 @@ class ApiServiceAuth {
     String password,
     String otp,
   ) async {
+    // 👉 Nếu bật mock
+    if (useMock) {
+      return MockAuthService.login(username, password, otp);
+    }
     ///////fmcs
-    final url = Uri.parse(
-      "http://192.168.110.2/web_develop/fmcs/Backend/login.php",
-    );
+    final url = Uri.parse("$baseUrl/fmcs/Backend/login.php");
 
     final response = await http.post(
       url,

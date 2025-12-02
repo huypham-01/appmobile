@@ -3,6 +3,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:mobile/cmms/data/mock_data.dart';
 import 'package:mobile/cmms/data/services/api_service.dart';
 import 'package:mobile/utils/constants.dart';
 
@@ -10,7 +11,7 @@ import '../models/equipment.dart';
 
 class EquipmentService {
   // Cấu hình API
-  static const String baseUrll = '$baseUrl/cip3/index.php';
+  static const String baseUrll = '$baseUrl/cmms/cip3/index.php';
   static const Duration timeoutDuration = Duration(seconds: 30);
 
   // Headers mặc định
@@ -42,6 +43,16 @@ class EquipmentService {
     String? category,
     String? status,
   }) async {
+    if (useMock) {
+      final mockJson = await MockEquipmentService.getEquipments(
+        page: page,
+        limit: limit,
+        search: search,
+        category: category,
+        status: status,
+      );
+      return EquipmentResponse.fromJson(mockJson);
+    }
     try {
       // Tạo query parameters
       final queryParams = <String, String>{

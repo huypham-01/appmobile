@@ -13,8 +13,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../data/services/api_service.dart';
 
 class LoginScreen extends StatefulWidget {
-  final String? keyW;
-  const LoginScreen({super.key, this.keyW});
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -157,12 +156,7 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
     setState(() => isLoading = true);
 
     try {
-      final response = await ApiService.login(
-        username,
-        password,
-        otp,
-        widget.keyW!,
-      );
+      final response = await ApiService.login(username, password, otp);
       if (response['success'] == true) {
         otpController.clear();
         _lastProcessedOtp = '';
@@ -179,6 +173,14 @@ class _LoginScreenState extends State<LoginScreen> with WidgetsBindingObserver {
         await MaintenanceNotificationService.scheduleDailyAlarms();
 
         if (mounted) {
+          if (useMock) {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              CmmsRoutes.main, // hoặc AppRoutes.home tùy bạn đặt trang chính
+              (route) => false,
+            );
+            return;
+          }
           if (_showOtpField) {
             // 👉 Chuyển sang trang đổi mật khẩu
             Navigator.pushNamedAndRemoveUntil(

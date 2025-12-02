@@ -648,7 +648,7 @@ class _TasksScreenState extends State<TasksScreen>
                 value: item,
                 child: Text(item, overflow: TextOverflow.ellipsis),
               );
-            }).toList(),
+            }),
           ],
           onChanged: onChanged,
         ),

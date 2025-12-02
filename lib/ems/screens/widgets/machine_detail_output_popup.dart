@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile/ems/data/ems_api_service.dart';
 import 'package:mobile/l10n/generated/app_localizations.dart';
+import 'package:mobile/utils/constants.dart';
 
 import '../../data/models/machine_model.dart';
 
@@ -262,7 +263,7 @@ class _MachineDetailOutputPopupState extends State<MachineDetailOutputPopup> {
       children: [
         // Output Summary
         _buildOutputSummary(),
-        const SizedBox(height: 8),
+        const SizedBox(height: 4),
 
         // Filter Section
         _buildFilterSection(),
@@ -313,7 +314,7 @@ class _MachineDetailOutputPopupState extends State<MachineDetailOutputPopup> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            '${AppLocalizations.of(context)!.subtotal}: ${subTotal.toStringAsFixed(0)}',
+                            '${AppLocalizations.of(context)!.subtotal}: ${formatNumber(subTotal)}',
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
@@ -409,17 +410,17 @@ class _MachineDetailOutputPopupState extends State<MachineDetailOutputPopup> {
               _buildColumn(
                 AppLocalizations.of(context)!.outputPcs,
                 // summary.dayOutput.toStringAsFixed(0),
-                NumberFormat('#,###').format(summary.dayOutput)
+                NumberFormat('#,###').format(summary.dayOutput),
               ),
               _buildColumn(
                 AppLocalizations.of(context)!.outputPcs,
                 // summary.nightOutput.toStringAsFixed(0),
-                NumberFormat('#,###').format(summary.nightOutput)
+                NumberFormat('#,###').format(summary.nightOutput),
               ),
               _buildColumn(
                 AppLocalizations.of(context)!.outputPcs,
                 // summary.totalOutput.toStringAsFixed(0),
-                NumberFormat('#,###').format(summary.totalOutput)
+                NumberFormat('#,###').format(summary.totalOutput),
               ),
             ],
           ),
@@ -454,7 +455,7 @@ class _MachineDetailOutputPopupState extends State<MachineDetailOutputPopup> {
   Widget _buildFilterSection() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -498,34 +499,31 @@ class _MachineDetailOutputPopupState extends State<MachineDetailOutputPopup> {
             children: [
               Expanded(child: _buildFamilySelector()),
               const SizedBox(width: 10),
-              Padding(
-                padding: const EdgeInsets.only(top: 20),
-                child: GestureDetector(
-                  onTap: _performSearch,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.blue[700],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.search, size: 16, color: Colors.white),
-                        SizedBox(width: 4),
-                        Text(
-                          AppLocalizations.of(context)!.search,
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
+              GestureDetector(
+                onTap: _performSearch,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.blue[700],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.search, size: 16, color: Colors.white),
+                      SizedBox(width: 4),
+                      Text(
+                        AppLocalizations.of(context)!.search,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -589,15 +587,15 @@ class _MachineDetailOutputPopupState extends State<MachineDetailOutputPopup> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          AppLocalizations.of(context)!.family,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
-        ),
-        const SizedBox(height: 4),
+        // Text(
+        //   AppLocalizations.of(context)!.family,
+        //   style: TextStyle(
+        //     fontSize: 12,
+        //     fontWeight: FontWeight.w600,
+        //     color: Colors.black87,
+        //   ),
+        // ),
+        // const SizedBox(height: 4),
         SizedBox(
           height: 40,
           child: Container(
@@ -681,7 +679,7 @@ class _MachineDetailOutputPopupState extends State<MachineDetailOutputPopup> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    "${AppLocalizations.of(context)!.output}: ${item.output.toStringAsFixed(0)}",
+                    "${AppLocalizations.of(context)!.output}: ${formatNumber(item.output)}",
                     style: const TextStyle(
                       fontSize: 11,
                       color: Colors.blue,
@@ -711,7 +709,8 @@ class _MachineDetailOutputPopupState extends State<MachineDetailOutputPopup> {
                 Expanded(
                   child: _buildInfoItem(
                     AppLocalizations.of(context)!.capacity,
-                    item.capacity.toString(),
+                    // item.capacity.toString(),
+                    formatNumber(item.capacity),
                   ),
                 ),
                 Expanded(

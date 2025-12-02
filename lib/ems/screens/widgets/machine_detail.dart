@@ -95,7 +95,7 @@ class _MachineDetailState extends State<MachineDetail> {
     try {
       final reportDate = _getDateForTimeFrame(timeFrame);
       final url = Uri.parse(
-        'http://192.168.110.2/web_develop/ems/api.php?action=get_hourly_report&device_id=$deviceId&report_date=$reportDate',
+        '$baseUrl/ems/api.php?action=get_hourly_report&device_id=$deviceId&report_date=$reportDate',
       );
 
       final response = await http.get(url);
@@ -170,7 +170,7 @@ class _MachineDetailState extends State<MachineDetail> {
         automaticallyImplyLeading: false,
 
         actions: [
-          if (canCreateAction) // 👈 Chỉ hiện khi có quyền
+          if (canCreateAction && !useMock) // 👈 Chỉ hiện khi có quyền
             Padding(
               padding: const EdgeInsets.only(right: 12),
               child: OutlinedButton.icon(

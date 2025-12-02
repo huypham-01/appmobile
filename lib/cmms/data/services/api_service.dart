@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:jwt_decode/jwt_decode.dart';
+import 'package:mobile/cmms/data/mock_data.dart';
+import 'package:mobile/fmcs/data/mock_data2.dart';
 import 'package:mobile/utils/constants.dart';
 import 'package:mobile/utils/helper/onboarding_helper.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,7 +21,7 @@ class ApiService {
   static const Duration _timeout = Duration(seconds: 30);
   static Future<bool> isFirstLogin(String username) async {
     final url = Uri.parse(
-      "http://192.168.110.2/web_develop/iam/cip3/index.php?c=AuthController&m=getVerify&username=$username",
+      "$baseUrl/iam/cip3/index.php?c=AuthController&m=getVerify&username=$username",
     );
 
     try {
@@ -43,7 +45,7 @@ class ApiService {
 
   static Future<List<String>> getPermissions(String username) async {
     final url =
-        "http://192.168.110.2/web_develop/iam/cip3/?c=PermissionController&m=getPermissionByUsername";
+        "$baseUrl/iam/cip3/?c=PermissionController&m=getPermissionByUsername";
 
     try {
       final response = await http
@@ -71,20 +73,21 @@ class ApiService {
     String username,
     String password,
     String otp,
-    String keyw,
   ) async {
+    if (useMock) {
+      return MockAuthService.login(username, password, otp);
+    }
     // Validate input
     if (username.trim().isEmpty || password.trim().isEmpty) {
       return {
         "success": false,
-        "message": "Tên đăng nhập và mật khẩu không được để trống",
+        "message": "Username and password cannot be blank",
       };
     }
     // final isFirstTime = await isFirstLogin(username.trim());
 
-    final url = _urlCust(keyw);
-    // final url =
-    //     "http://192.168.110.2/web_develop/iam/cip3/index.php?c=AuthController&m=login";
+    // final url = _urlCust(keyw);
+    final url = "$baseUrl/cmms/cip3/index.php?c=AuthController&m=login";
 
     try {
       final response = await http
@@ -125,7 +128,6 @@ class ApiService {
         // 🔒 Lưu quyền vào SharedPreferences
         final prefs = await SharedPreferences.getInstance();
         await prefs.setStringList("permissions", permissions);
-        
 
         // openOtpApp(userId);
         // Kiểm tra nếu là lần đầu đăng nhập thì mới mở openOtpApp
@@ -180,6 +182,17 @@ class ApiService {
 
   static Future<Map<String, dynamic>> setPassword(String password) async {
     try {
+      if (useMock) {
+        return {
+          'success': true,
+          'statusCode': 200,
+          'data': {
+            "status": "success",
+            "message": "Password updated successfully (mock)",
+            "updated_at": "2025-12-01 10:00:00",
+          },
+        };
+      }
       final token = await ApiService.getToken();
       final decoded = await ApiService.decodeToken();
       print('🔓 Decode token: $decoded');
@@ -206,9 +219,7 @@ class ApiService {
 
       final response = await http
           .post(
-            Uri.parse(
-              "http://192.168.110.2/web_develop/iam/cip3/?c=UserController&m=updateUser",
-            ),
+            Uri.parse("$baseUrl/iam/cip3/?c=UserController&m=updateUser"),
             headers: headers,
             body: body,
           )
@@ -307,7 +318,9 @@ class ApiService {
 
   /// Đăng xuất
   static Future<Map<String, dynamic>> logout() async {
-    final url = Uri.parse("$baseUrl/cip3/index.php?c=AuthController&m=logout");
+    final url = Uri.parse(
+      "$baseUrl/cmms/cip3/index.php?c=AuthController&m=logout",
+    );
 
     try {
       final token = await getToken();
@@ -395,6 +408,18 @@ class ApiService {
     }
   }
 
+  static Future<String?> getUsername() async {
+    final token = await getToken();
+    if (token == null) return null;
+
+    try {
+      final payload = Jwt.parseJwt(token);
+      return payload["username"]?.toString();
+    } catch (e) {
+      return null;
+    }
+  }
+
   /// Lấy thông tin user từ token
   static Future<Map<String, dynamic>?> getUserInfo() async {
     final token = await getToken();
@@ -416,7 +441,9 @@ class ApiService {
 
   /// Refresh token (nếu API hỗ trợ)
   static Future<Map<String, dynamic>> refreshToken() async {
-    final url = Uri.parse("$baseUrl/cip3/index.php?c=AuthController&m=refresh");
+    final url = Uri.parse(
+      "$baseUrl/cmms/cip3/index.php?c=AuthController&m=refresh",
+    );
 
     try {
       final token = await getToken();
@@ -470,19 +497,6 @@ class ApiService {
       return jsonDecode(payload);
     } catch (e) {
       return null;
-    }
-  }
-
-  static String _urlCust(String keyw) {
-    switch (keyw) {
-      case "cmms":
-        return "$baseUrl/cip3/index.php?c=AuthController&m=login";
-      case "ems":
-        return "http://192.168.110.2/web_develop/ems/backend/login.php";
-      case "fmcs":
-        return "http://192.168.110.2/web_develop/fmcs/Backend/login.php";
-      default:
-        return "";
     }
   }
 }

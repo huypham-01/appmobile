@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mobile/cmms/data/mock_data.dart';
 import 'package:mobile/l10n/generated/app_localizations.dart';
 import 'dart:convert';
 import 'package:mobile/utils/constants.dart';
@@ -26,7 +27,7 @@ class _WorkingInstructionsScreenState extends State<WorkingInstructionsScreen> {
 
   // API endpoint
   final String apiUrl =
-      '$baseUrl/cip3/index.php?c=WorkingInstructionController&m=getAllWi&limit=10000';
+      '$baseUrl/cmms/cip3/index.php?c=WorkingInstructionController&m=getAllWi&limit=10000';
 
   @override
   void initState() {
@@ -36,49 +37,113 @@ class _WorkingInstructionsScreenState extends State<WorkingInstructionsScreen> {
     _loadWorkingInstructions();
   }
 
+  // Future<void> _loadWorkingInstructions() async {
+  //   try {
+  //     setState(() {
+  //       isLoading = true;
+  //       errorMessage = null;
+  //     });
+
+  //     Map<String, dynamic> jsonData;
+
+  //     if (useMock) {
+  //       // ---- DÙNG MOCK ----
+  //       jsonData = await MockWorkingInstructionService.getWorkingInstructions();
+  //     } else {
+  //       // ---- DÙNG API THẬT ----
+  //       final token = await ApiService.getToken();
+
+  //       final response = await http.get(
+  //         Uri.parse(apiUrl),
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //           'Authorization': 'Bearer $token',
+  //         },
+  //       );
+
+  //       if (response.statusCode != 200) {
+  //         throw Exception("Server error: ${response.statusCode}");
+  //       }
+
+  //       jsonData = json.decode(response.body);
+  //     }
+
+  //     // ---- XỬ LÝ DỮ LIỆU CHUNG ----
+  //     if (jsonData['status'] == 'success' && jsonData['data'] != null) {
+  //       final List<dynamic> listJson = jsonData['data'];
+
+  //       setState(() {
+  //         allInstructions = listJson
+  //             .map((json) => WorkingInstruction.fromJson(json))
+  //             .toList();
+  //         isLoading = false;
+  //       });
+  //     } else {
+  //       setState(() {
+  //         errorMessage = jsonData['message'] ?? 'Failed to load data';
+  //         isLoading = false;
+  //       });
+  //     }
+  //   } catch (e) {
+  //     setState(() {
+  //       errorMessage = 'Error: $e';
+  //       isLoading = false;
+  //     });
+  //   }
+  // }
   Future<void> _loadWorkingInstructions() async {
-    final token = await ApiService.getToken();
+    Map<String, dynamic>? jsonData;
+    String? localErrorMessage;
+    List<WorkingInstruction> localInstructions = [];
+
     try {
-      setState(() {
-        isLoading = true;
-        errorMessage = null;
-      });
-
-      final response = await http.get(
-        Uri.parse(apiUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body);
-
-        if (jsonData['status'] == 'success' && jsonData['data'] != null) {
-          final List<dynamic> instructionsJson = jsonData['data'];
-
-          setState(() {
-            allInstructions = instructionsJson
-                .map((json) => WorkingInstruction.fromJson(json))
-                .toList();
-            isLoading = false;
-          });
-        } else {
-          setState(() {
-            errorMessage = jsonData['message'] ?? 'Failed to load data';
-            isLoading = false;
-          });
-        }
-      } else {
+      // Bắt đầu load
+      if (mounted) {
         setState(() {
-          errorMessage = 'Server error: ${response.statusCode}';
-          isLoading = false;
+          isLoading = true;
+          errorMessage = null;
         });
       }
+
+      if (useMock) {
+        // ---- DÙNG MOCK ----
+        jsonData = await MockWorkingInstructionService.getWorkingInstructions();
+      } else {
+        // ---- DÙNG API THẬT ----
+        final token = await ApiService.getToken();
+        final response = await http.get(
+          Uri.parse(apiUrl),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+        );
+
+        if (response.statusCode != 200) {
+          throw Exception("Server error: ${response.statusCode}");
+        }
+
+        jsonData = json.decode(response.body);
+      }
+
+      // Xử lý dữ liệu
+      if (jsonData!['status'] == 'success' && jsonData['data'] != null) {
+        final List<dynamic> listJson = jsonData['data'];
+        localInstructions = listJson
+            .map((json) => WorkingInstruction.fromJson(json))
+            .toList();
+      } else {
+        localErrorMessage = jsonData['message'] ?? 'Failed to load data';
+      }
     } catch (e) {
+      localErrorMessage = 'Error: $e';
+    }
+
+    // Cập nhật state một lần duy nhất, nếu widget vẫn còn mounted
+    if (mounted) {
       setState(() {
-        errorMessage = 'Network error: $e';
+        allInstructions = localInstructions;
+        errorMessage = localErrorMessage;
         isLoading = false;
       });
     }

@@ -302,9 +302,9 @@
   "vietnameseDisplay": "🇻🇳 Tiếng Việt",
   "english": "English",
   "englishDisplay": "🇺🇸 English",
-  "chinese": "Chinese",
+  "chinese": "Simplified Chinese",
   "chineseDisplay": "🇨🇳 中文（简体）",
-  "taiwanese": "Taiwanese",
+  "taiwanese": "Traditional Chinese",
   "taiwaneseDisplay": "🇹🇼 中文（繁體）",
   "notificationsSection": "Notifications",
   "pushNotifications": "Push Notifications",
@@ -337,6 +337,18 @@
 
   "tabIssue": "Issue",
   "statusConnected": "Connected",
-  "statusDisconnected": "Disconnected"
+  "statusDisconnected": "Disconnected",
+
+  "updateAvailableTitle": "A new update is available!",
+  "updateDialogTitle": "Update {version}",
+  "updateDescription": "A new update is available!",
+  "updateLater": "Later",
+  "updateNow": "Update now",
+  "downloadingTitle": "Downloading...",
+  "cmmsDescription": "Computerized Maintenance Management System",
+  "emsDescription": "Equipment Management System",
+  "fmcsDescription": "Facility Management Control System",
+  "appVersion" : "Version {appVersion}"
+
   
 } 

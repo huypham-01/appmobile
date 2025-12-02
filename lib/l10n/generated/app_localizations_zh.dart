@@ -267,7 +267,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get addplan => '添加行动计划';
 
   @override
-  String get actionid => '行动计划编号';
+  String get actionid => '操作编号';
 
   @override
   String get plannedcompletiondate => '计划完成日期';
@@ -1005,6 +1005,40 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get statusDisconnected => '已断开';
+
+  @override
+  String get updateAvailableTitle => '有新的更新可用！';
+
+  @override
+  String updateDialogTitle(Object version) {
+    return '更新 $version';
+  }
+
+  @override
+  String get updateDescription => '有新的更新可用！';
+
+  @override
+  String get updateLater => '稍后';
+
+  @override
+  String get updateNow => '立即更新';
+
+  @override
+  String get downloadingTitle => '正在下载...';
+
+  @override
+  String get cmmsDescription => '计算机化维护管理系统';
+
+  @override
+  String get emsDescription => '设备管理系统';
+
+  @override
+  String get fmcsDescription => '设施管理控制系统';
+
+  @override
+  String appVersion(Object appVersion) {
+    return '版本 $appVersion';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -1267,7 +1301,7 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get addplan => '新增行動計劃';
 
   @override
-  String get actionid => '行動計劃編號';
+  String get actionid => '操作編號';
 
   @override
   String get plannedcompletiondate => '計劃完成日期';
@@ -2002,4 +2036,38 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get statusDisconnected => '已斷開';
+
+  @override
+  String get updateAvailableTitle => '有新的更新可用！';
+
+  @override
+  String updateDialogTitle(Object version) {
+    return '更新 $version';
+  }
+
+  @override
+  String get updateDescription => '有新的更新可用！';
+
+  @override
+  String get updateLater => '稍後';
+
+  @override
+  String get updateNow => '立即更新';
+
+  @override
+  String get downloadingTitle => '正在下載...';
+
+  @override
+  String get cmmsDescription => '電腦化維護管理系統';
+
+  @override
+  String get emsDescription => '設備管理系統';
+
+  @override
+  String get fmcsDescription => '設施管理控制系統';
+
+  @override
+  String appVersion(Object appVersion) {
+    return '版本 $appVersion';
+  }
 }

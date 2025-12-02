@@ -8,8 +8,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../main.dart';
 
 const String ipconfig = "192.168.110.2";
-const String baseUrl = "http://192.168.110.2/web_develop/cmms";
+const String baseUrl = "http://192.168.110.2";
 // const String baseUrl = "http://192.168.0.103:8080/web_develop/iam";
+const bool useMock = bool.fromEnvironment('USE_MOCK', defaultValue: false);
 
 final white = Colors.grey[50];
 final cusBlue = Color.fromARGB(255, 67, 103, 164);
@@ -676,7 +677,9 @@ Color getMaintenanceColor(String? type) {
   }
 }
 
-String formatNumber(double value) {
+String formatNumber(num? value) {
+  if (value == null) return "-";
+
   final formatter = NumberFormat('#,###', 'vi_VN');
   return formatter.format(value.round());
 }

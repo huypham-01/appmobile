@@ -1880,7 +1880,7 @@ abstract class AppLocalizations {
   /// No description provided for @chinese.
   ///
   /// In en, this message translates to:
-  /// **'Chinese'**
+  /// **'Simplified Chinese'**
   String get chinese;
 
   /// No description provided for @chineseDisplay.
@@ -1892,7 +1892,7 @@ abstract class AppLocalizations {
   /// No description provided for @taiwanese.
   ///
   /// In en, this message translates to:
-  /// **'Taiwanese'**
+  /// **'Traditional Chinese'**
   String get taiwanese;
 
   /// No description provided for @taiwaneseDisplay.
@@ -2080,6 +2080,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Disconnected'**
   String get statusDisconnected;
+
+  /// No description provided for @updateAvailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A new update is available!'**
+  String get updateAvailableTitle;
+
+  /// No description provided for @updateDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update {version}'**
+  String updateDialogTitle(Object version);
+
+  /// No description provided for @updateDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'A new update is available!'**
+  String get updateDescription;
+
+  /// No description provided for @updateLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Later'**
+  String get updateLater;
+
+  /// No description provided for @updateNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Update now'**
+  String get updateNow;
+
+  /// No description provided for @downloadingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading...'**
+  String get downloadingTitle;
+
+  /// No description provided for @cmmsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Computerized Maintenance Management System'**
+  String get cmmsDescription;
+
+  /// No description provided for @emsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Equipment Management System'**
+  String get emsDescription;
+
+  /// No description provided for @fmcsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Facility Management Control System'**
+  String get fmcsDescription;
+
+  /// No description provided for @appVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {appVersion}'**
+  String appVersion(Object appVersion);
 }
 
 class _AppLocalizationsDelegate

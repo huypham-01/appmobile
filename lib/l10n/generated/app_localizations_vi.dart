@@ -402,10 +402,10 @@ class AppLocalizationsVi extends AppLocalizations {
   String get urgent => 'Khẩn cấp';
 
   @override
-  String get lower => 'Thấp hơn';
+  String get lower => 'Thấp';
 
   @override
-  String get upper => 'Cao hơn';
+  String get upper => 'Cao';
 
   @override
   String get edit => 'Chỉnh sửa';
@@ -715,7 +715,7 @@ class AppLocalizationsVi extends AppLocalizations {
   String get needToInspect => 'Cần kiểm tra';
 
   @override
-  String get maintenanceMachineTitle => 'Bảo trì máy móc';
+  String get maintenanceMachineTitle => 'Bảo trì máy';
 
   @override
   String get scheduledToday => 'Lên lịch hôm nay';
@@ -1012,4 +1012,38 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get statusDisconnected => 'Mất kết nối';
+
+  @override
+  String get updateAvailableTitle => 'Đã có bản cập nhật mới!';
+
+  @override
+  String updateDialogTitle(Object version) {
+    return 'Cập nhật $version';
+  }
+
+  @override
+  String get updateDescription => 'Đã có bản cập nhật mới!';
+
+  @override
+  String get updateLater => 'Để sau';
+
+  @override
+  String get updateNow => 'Cập nhật ngay';
+
+  @override
+  String get downloadingTitle => 'Đang tải xuống...';
+
+  @override
+  String get cmmsDescription => 'Hệ thống quản lý bảo trì';
+
+  @override
+  String get emsDescription => 'Hệ thống quản lý thiết bị';
+
+  @override
+  String get fmcsDescription => 'Hệ thống kiểm soát và quản lý cơ sở hạ tầng';
+
+  @override
+  String appVersion(Object appVersion) {
+    return 'Phiên bản $appVersion';
+  }
 }

@@ -840,6 +840,8 @@ class Device {
       historyCountUpdatedAt: json['history_count_updated_at'],
     );
   }
+
+  toJson() {}
 }
 
 class DeviceResponse {

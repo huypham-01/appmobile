@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:mobile/ems/data/mock_data.dart';
+import 'package:mobile/utils/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'models/machine_model.dart';
 
 class EmsApiService {
-  static const String baseUrl = "http://192.168.110.2/web_develop/ems/api.php";
+  // static const String baseUrl = "$baseUrl/ems/api.php";
   static Future<String?> _getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('auth_token');
@@ -13,8 +15,13 @@ class EmsApiService {
 
   static Future<List<Machine>> fetchMachine(String key) async {
     try {
+      if (useMock) {
+        return MockMachineService.fetchMachineMock(key);
+      }
       final response = await http.get(
-        Uri.parse("$baseUrl?action=get_machine_details&process=$key"),
+        Uri.parse(
+          "$baseUrl/ems/api.php?action=get_machine_details&process=$key",
+        ),
       );
 
       if (response.statusCode == 200) {
@@ -32,7 +39,7 @@ class EmsApiService {
     try {
       final response = await http.get(
         Uri.parse(
-          'http://192.168.110.2/web_develop/ems/api.php?action=list_device_actions_v2&device_id=$deviceId',
+          '$baseUrl/ems/api.php?action=list_device_actions_v2&device_id=$deviceId',
         ),
       );
 
@@ -65,7 +72,7 @@ class EmsApiService {
       // 🔹 Endpoint ví dụ: /api/issues/{id}/plans
       final response = await http.get(
         Uri.parse(
-          'http://192.168.110.2/web_develop/ems/api.php?action=list_action_plans&action_id=$issueId',
+          '$baseUrl/ems/api.php?action=list_action_plans&action_id=$issueId',
         ),
       );
 
@@ -87,7 +94,7 @@ class EmsApiService {
     try {
       final response = await http.get(
         Uri.parse(
-          'http://192.168.110.2/web_develop/ems/api.php?action=get_hourly_report&device_id=AC230802&report_date=2025-10-09',
+          '$baseUrl/ems/api.php?action=get_hourly_report&device_id=AC230802&report_date=2025-10-09',
         ),
       );
 
@@ -113,7 +120,7 @@ class EmsApiService {
     final toStr = Uri.encodeComponent(to.toString());
 
     final url =
-        'http://192.168.110.2/web_develop/ems/api.php?action=search_device&device_id=$deviceId&from=$fromStr&to=$toStr&limit=1000';
+        '$baseUrl/ems/api.php?action=search_device&device_id=$deviceId&from=$fromStr&to=$toStr&limit=1000';
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
@@ -128,7 +135,7 @@ class EmsApiService {
 
   static Future<NextActionModel?> fetchNextAction() async {
     final url = Uri.parse(
-      'http://192.168.110.2/web_develop/ems/api.php?action=preview_next_codes',
+      '$baseUrl/ems/api.php?action=preview_next_codes',
     ); // endpoint của bạn
 
     try {
@@ -159,6 +166,12 @@ class EmsApiService {
     required DateTime to,
   }) async {
     try {
+      if (useMock) {
+        return MockSummaryService.fetchSummaryReport(
+          from: DateTime(2025, 11, 28, 7, 0),
+          to: DateTime(2025, 11, 28, 19, 0),
+        );
+      }
       // Encode ngày giờ cho URL
       final String fromStr = Uri.encodeComponent(
         from.toIso8601String().replaceFirst('T', ' ').split('.').first,
@@ -168,7 +181,7 @@ class EmsApiService {
       );
 
       final url =
-          '$baseUrl?action=get_summary_report&from=$fromStr&to=$toStr&_=${DateTime.now().millisecondsSinceEpoch}';
+          '$baseUrl/ems/api.php?action=get_summary_report&from=$fromStr&to=$toStr&_=${DateTime.now().millisecondsSinceEpoch}';
 
       final response = await http.get(Uri.parse(url));
 
@@ -190,9 +203,15 @@ class EmsApiService {
     String status,
   ) async {
     try {
+      if (useMock) {
+        return MockMachineStatusService.fetchMachineStatus(
+          "Single", // processName
+          "RUNNING", // status
+        );
+      }
       final response = await http.get(
         Uri.parse(
-          "$baseUrl?action=get_machine_details&process=$processName&status=$status",
+          "$baseUrl/ems/api.php?action=get_machine_details&process=$processName&status=$status",
         ),
       );
 
@@ -212,6 +231,13 @@ class EmsApiService {
     DateTime toDate,
     String processName,
   ) async {
+    if (useMock) {
+      return MockMachineStatusService.fetchMachineEfficiency(
+        DateTime(2025, 11, 28, 7, 0, 0), // fromDate fixed
+        DateTime(2025, 11, 28, 19, 0, 0), // toDate fixed
+        "Single",
+      );
+    }
     // Format datetime thành kiểu backend PHP hiểu được: yyyy-MM-dd HH:mm:ss
     String formatDate(DateTime date) {
       return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} "
@@ -221,17 +247,16 @@ class EmsApiService {
     final from = formatDate(fromDate);
     final to = formatDate(toDate);
 
-    final uri = Uri.parse('http://192.168.110.2/web_develop/ems/api.php')
-        .replace(
-          queryParameters: {
-            'action': 'get_efficiency_report_data',
-            'process': processName,
-            'from': from,
-            'to': to,
-            'sort_by': 'machine_id',
-            'sort_order': 'ASC',
-          },
-        );
+    final uri = Uri.parse('$baseUrl/ems/api.php').replace(
+      queryParameters: {
+        'action': 'get_efficiency_report_data',
+        'process': processName,
+        'from': from,
+        'to': to,
+        'sort_by': 'machine_id',
+        'sort_order': 'ASC',
+      },
+    );
 
     try {
       final response = await http.get(uri);
@@ -255,6 +280,14 @@ class EmsApiService {
     required String processName,
     required String family,
   }) async {
+    if (useMock) {
+      return await MockMachineStatusService.fetchDetailMachineOutput(
+        fromDate: DateTime(2025, 11, 28, 7, 0, 0),
+        toDate: DateTime(2025, 11, 28, 19, 0, 0),
+        processName: "Single",
+        family: family,
+      );
+    }
     // Định dạng thời gian đúng như API PHP yêu cầu: yyyy-MM-dd HH:mm:ss
     String formatDate(DateTime date) {
       return "${date.year}-"
@@ -269,7 +302,7 @@ class EmsApiService {
     final to = Uri.encodeComponent(formatDate(toDate));
 
     final url = Uri.parse(
-      'http://192.168.110.2/web_develop/ems/api.php'
+      '$baseUrl/ems/api.php'
       '?action=get_output_report'
       '&process=$processName'
       '&from=$from'
@@ -295,7 +328,7 @@ class EmsApiService {
   static Future<FamilyListResponse?> fetchFamilyList(String processName) async {
     final token = await _getToken();
     final url = Uri.parse(
-      'http://192.168.110.2/web_develop/ems/api.php?action=get_families&process=$processName',
+      '$baseUrl/ems/api.php?action=get_families&process=$processName',
     );
 
     try {
@@ -320,8 +353,11 @@ class EmsApiService {
   }
 
   static Future<DeviceResponse?> fetchDevices() async {
+    if (useMock) {
+      return MockDeviceService.fetchDevicesMock();
+    }
     final url = Uri.parse(
-      'http://192.168.110.2/web_develop/ems/backend/backend.php?action=get_devices',
+      '$baseUrl/ems/backend/backend.php?action=get_devices',
     );
 
     try {
@@ -355,10 +391,11 @@ class EmsApiService {
     int? assignedTo,
     required List<Map<String, dynamic>> plans,
   }) async {
+    if(useMock) {
+
+    }
     final token = await _getToken();
-    final url = Uri.parse(
-      "http://192.168.110.2/web_develop/ems/api.php?action=create_action_public",
-    );
+    final url = Uri.parse("$baseUrl/ems/api.php?action=create_action_public");
 
     final request = http.MultipartRequest('POST', url)
       ..fields['device_id'] = deviceId
@@ -386,7 +423,7 @@ class EmsApiService {
   static Future<Map<String, dynamic>> updateActionPlanStatus({
     required int planId,
   }) async {
-    final url = Uri.parse("http://192.168.110.2/web_develop/ems/api.php");
+    final url = Uri.parse("$baseUrl/ems/api.php");
     final token = await _getToken();
     final response = await http.post(
       url,
@@ -412,9 +449,12 @@ class EmsApiService {
     Map<String, String?> newData,
   ) async {
     try {
+      if (useMock) {
+        return MockEmsApiService.addDevice(newData);
+      }
       final token = await _getToken();
       final response = await http.post(
-        Uri.parse("http://192.168.110.2/web_develop/ems/backend/backend.php"),
+        Uri.parse("$baseUrl/ems/backend/backend.php"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/x-www-form-urlencoded",
@@ -442,9 +482,12 @@ class EmsApiService {
     Map<String, String?> newData,
   ) async {
     try {
+      if (useMock) {
+        return MockEmsApiService.updateDevice(newData);
+      }
       final token = await _getToken();
       final response = await http.post(
-        Uri.parse("http://192.168.110.2/web_develop/ems/backend/backend.php"),
+        Uri.parse("$baseUrl/ems/backend/backend.php"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/x-www-form-urlencoded",
@@ -470,10 +513,13 @@ class EmsApiService {
 
   static Future<Map<String, dynamic>> deleteDevice(String id) async {
     try {
+      if (useMock) {
+        return MockEmsApiService.deleteDevice(id);
+      }
       final token =
           await _getToken(); // Nếu bạn đang dùng token giống các API khác
       final response = await http.post(
-        Uri.parse("http://192.168.110.2/web_develop/ems/backend/backend.php"),
+        Uri.parse("$baseUrl/ems/backend/backend.php"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/x-www-form-urlencoded",
@@ -495,9 +541,7 @@ class EmsApiService {
   }
 
   static Future<List<ActionItemEms>> fetchActionItemEmss() async {
-    final url = Uri.parse(
-      'http://192.168.110.2/web_develop/ems/api.php?action=list_backend_issues',
-    );
+    final url = Uri.parse('$baseUrl/ems/api.php?action=list_backend_issues');
     final token = await _getToken();
 
     try {
@@ -520,9 +564,7 @@ class EmsApiService {
   static Future<Map<String, dynamic>> setActionApproval({
     required int actionId,
   }) async {
-    final url = Uri.parse(
-      "http://192.168.110.2/web_develop/ems/backend/backend.php",
-    );
+    final url = Uri.parse("$baseUrl/ems/backend/backend.php");
     final token = await _getToken();
     final response = await http.post(
       url,
@@ -542,7 +584,7 @@ class EmsApiService {
 
   static Future<List<ActionPlann>> fetchPlans(int actionId) async {
     final url = Uri.parse(
-      "http://192.168.110.2/web_develop/ems/api.php?action=list_action_plans&action_id=$actionId",
+      "$baseUrl/ems/api.php?action=list_action_plans&action_id=$actionId",
     );
     final token = await _getToken();
 
@@ -566,9 +608,7 @@ class EmsApiService {
     required int actionId,
     required String reason,
   }) async {
-    final url = Uri.parse(
-      "http://192.168.110.2/web_develop/ems/backend/backend.php",
-    );
+    final url = Uri.parse("$baseUrl/ems/backend/backend.php");
 
     final token = await _getToken();
 
@@ -599,9 +639,7 @@ class EmsApiService {
     required int actionId,
     required String reason,
   }) async {
-    final url = Uri.parse(
-      "http://192.168.110.2/web_develop/ems/backend/backend.php",
-    );
+    final url = Uri.parse("$baseUrl/ems/backend/backend.php");
 
     final token = await _getToken();
 
@@ -632,9 +670,7 @@ class EmsApiService {
     required int actionId,
     required String reason,
   }) async {
-    final url = Uri.parse(
-      "http://192.168.110.2/web_develop/ems/backend/backend.php",
-    );
+    final url = Uri.parse("$baseUrl/ems/backend/backend.php");
 
     final token = await _getToken();
 
@@ -663,9 +699,7 @@ class EmsApiService {
 }
 
 class ProductionApiService {
-  final String baseUrl;
-
-  ProductionApiService({required this.baseUrl});
+  ProductionApiService();
 
   // Fetch production data from API
   Future<ProductionResponse> getProductionData({
@@ -674,6 +708,13 @@ class ProductionApiService {
     String? family,
   }) async {
     try {
+      if (useMock) {
+        return await MockProductionService.getProductionData(
+          fromDate: DateTime(2025, 11, 28, 7, 0),
+          toDate: DateTime(2025, 11, 29, 7, 0),
+          family: family,
+        );
+      }
       String formatDate(DateTime date) {
         return "${date.year}-"
             "${date.month.toString().padLeft(2, '0')}-"
@@ -686,7 +727,7 @@ class ProductionApiService {
       final from = Uri.encodeComponent(formatDate(fromDate));
       final to = Uri.encodeComponent(formatDate(toDate));
       final uri = Uri.parse(
-        "http://192.168.110.2/web_develop/ems/api.php?action=get_output_report_bulk&from=$from&to=$to&proc=blister&families=$family",
+        "$baseUrl/ems/api.php?action=get_output_report_bulk&from=$from&to=$to&proc=blister&families=$family",
       );
 
       final response = await http.get(

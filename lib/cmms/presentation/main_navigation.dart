@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/l10n/generated/app_localizations.dart';
 
-import 'package:mobile/utils/routes/app_routes.dart';
 
 import '../../utils/constants.dart';
-import '../data/services/api_service.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/profile/profile_screen.dart';
 import 'screens/settings/setting_screen.dart';
@@ -29,14 +27,6 @@ class _MainNavigationState extends State<MainNavigation> {
     setState(() => _selectedIndex = index);
   }
 
-  Future<void> _handleLogout(BuildContext context) async {
-    await ApiService.logout();
-    Navigator.pushNamedAndRemoveUntil(
-      context,
-      AppRoutes.home,
-      (route) => false,
-    );
-  }
 
   @override
   Widget build(BuildContext context) {

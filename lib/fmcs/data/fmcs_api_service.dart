@@ -2,15 +2,16 @@
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:mobile/fmcs/data/mock_data2.dart';
+import 'package:mobile/utils/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'models/device_response_model.dart';
 
 class FmcsApiService {
-  final String baseUrl;
+  // final String baseUrl;
   final http.Client? client;
 
-  FmcsApiService({required this.baseUrl, http.Client? client})
-    : client = client ?? http.Client();
+  FmcsApiService({http.Client? client}) : client = client ?? http.Client();
 
   /// Lấy token từ local storage
   static Future<String?> _getToken() async {
@@ -21,6 +22,9 @@ class FmcsApiService {
   /// Lấy tất cả dữ liệu thiết bị
   Future<DeviceResponseModel> getAllDevicesData() async {
     try {
+      if (useMock) {
+        return MockDeviceService.getAllDevicesData();
+      }
       final response = await client!
           .get(
             Uri.parse('$baseUrl/fmcs/api.php'),
@@ -90,9 +94,7 @@ class FmcsApiService {
   static Future<ActionApiResponse> fetchActionData() async {
     final token = await _getToken();
     final response = await http.get(
-      Uri.parse(
-        "http://192.168.110.2/web_develop/fmcs/api_action.php?action=peek_codes",
-      ),
+      Uri.parse("$baseUrl/fmcs/api_action.php?action=peek_codes"),
       headers: {"Authorization": "Bearer $token"},
     );
     if (response.statusCode == 200) {
@@ -104,7 +106,7 @@ class FmcsApiService {
 
   static Future<List<Issue>> fetchIssues(String deviceId) async {
     final url = Uri.parse(
-      "http://192.168.110.2/web_develop/fmcs/api_action.php?action=list_actions&device_id=$deviceId",
+      "$baseUrl/fmcs/api_action.php?action=list_actions&device_id=$deviceId",
     );
     final response = await http.get(url);
 
@@ -119,7 +121,7 @@ class FmcsApiService {
   static Future<List<ActionPlan>> fetchActionPlans(int issueId) async {
     final response = await http.get(
       Uri.parse(
-        "http://192.168.110.2/web_develop/fmcs/api_action.php?action=list_action_plans&action_id=$issueId",
+        "$baseUrl/fmcs/api_action.php?action=list_action_plans&action_id=$issueId",
       ),
     );
 
@@ -132,9 +134,10 @@ class FmcsApiService {
   }
 
   static Future<List<LocationItem>> fetchLocations() async {
+    if (useMock) return MockLocationService.fetchLocations();
     final response = await http.get(
       Uri.parse(
-        "http://192.168.110.2/web_develop/fmcs/Backend/update_location.php?action=list_locations",
+        "$baseUrl/fmcs/Backend/update_location.php?action=list_locations",
       ),
     );
 
@@ -149,9 +152,7 @@ class FmcsApiService {
 
   static Future<List<DeviceItem>> fetchDevices() async {
     final response = await http.get(
-      Uri.parse(
-        'http://192.168.110.2/web_develop/fmcs/api.php',
-      ), // Adjust endpoint as needed
+      Uri.parse('$baseUrl/fmcs/api.php'), // Adjust endpoint as needed
       headers: {
         'Content-Type': 'application/json',
         // Add authorization headers if needed, e.g., 'Authorization': 'Bearer $token'
@@ -170,8 +171,11 @@ class FmcsApiService {
     Map<String, String> newData,
   ) async {
     try {
+      if (useMock) {
+        return await MockDeviceService.addDevice(newData);
+      }
       final response = await http.post(
-        Uri.parse("http://192.168.110.2/web_develop/fmcs/Backend/backend.php"),
+        Uri.parse("$baseUrl/fmcs/Backend/backend.php"),
         headers: {"Content-Type": "application/x-www-form-urlencoded"},
         body: {
           "action": "add",
@@ -209,11 +213,15 @@ class FmcsApiService {
   }
 
   static Future<Map<String, dynamic>> updateDevice(
-    Map<String, String> newData,
+    Map<String, String?> newData,
   ) async {
     try {
+      if (useMock) {
+        final deviceId = newData["device_id"] ?? "";
+        return MockDeviceService.updateDeviceMock(deviceId, newData);
+      }
       final response = await http.post(
-        Uri.parse("http://192.168.110.2/web_develop/fmcs/Backend/backend.php"),
+        Uri.parse("$baseUrl/fmcs/Backend/backend.php"),
         headers: {"Content-Type": "application/x-www-form-urlencoded"},
         body: {
           "action": "update",
@@ -255,8 +263,12 @@ class FmcsApiService {
     Map<String, String> newData,
   ) async {
     try {
+      if (useMock) {
+        final deviceId = newData["device_id"] ?? "";
+        return MockDeviceService.deleteDeviceMock(deviceId);
+      }
       final response = await http.post(
-        Uri.parse("http://192.168.110.2/web_develop/fmcs/Backend/backend.php"),
+        Uri.parse("$baseUrl/fmcs/Backend/backend.php"),
         headers: {"Content-Type": "application/x-www-form-urlencoded"},
         body: {
           "action": "delete",
@@ -290,9 +302,19 @@ class FmcsApiService {
     Map<String, dynamic>? metrics,
     Map<String, dynamic>? thresholds,
   }) async {
+    if (useMock) {
+      return MockDeviceService.createActionWithPlansMock(
+        deviceId: deviceId ?? "",
+        title: title ?? "",
+        issueType: issueType,
+        metrics: metrics ?? {},
+        thresholds: thresholds ?? {},
+        plans: plans ?? [],
+      );
+    }
     final token = await _getToken();
     final url = Uri.parse(
-      "http://192.168.110.2/web_develop/fmcs/api_action.php?action=create_action_with_plans",
+      "$baseUrl/fmcs/api_action.php?action=create_action_with_plans",
     );
 
     // body gửi dạng Map<String, String>
@@ -306,6 +328,7 @@ class FmcsApiService {
       "plans_json": jsonEncode(plans ?? []),
       "reason": "create action",
     };
+    print(body);
 
     final response = await http.post(
       url,
@@ -327,7 +350,7 @@ class FmcsApiService {
     required int planId,
   }) async {
     final url = Uri.parse(
-      "http://192.168.110.2/web_develop/fmcs/api_action.php?action=update_action_plan_status",
+      "$baseUrl/fmcs/api_action.php?action=update_action_plan_status",
     );
     final token = await _getToken();
     final response = await http.post(
@@ -354,7 +377,7 @@ class FmcsApiService {
     required int planId,
   }) async {
     final url = Uri.parse(
-      "http://192.168.110.2/web_develop/fmcs/api_action.php?action=delete_action_plan",
+      "$baseUrl/fmcs/api_action.php?action=delete_action_plan",
     );
     final token = await _getToken();
     final response = await http.post(
@@ -378,10 +401,14 @@ class FmcsApiService {
     required String locationName,
     String? description,
   }) async {
+    if (useMock) {
+      return MockLocationService.addLocation(
+        locationName: locationName,
+        description: description,
+      );
+    }
     final token = await _getToken(); // nếu bạn có JWT login
-    final url = Uri.parse(
-      "http://192.168.110.2/web_develop/fmcs/Backend/update_location.php",
-    );
+    final url = Uri.parse("$baseUrl/fmcs/Backend/update_location.php");
 
     final body = {
       "action": "add_location",
@@ -414,10 +441,15 @@ class FmcsApiService {
     required String locationName,
     String? description,
   }) async {
+    if (useMock) {
+      return MockLocationService.updateLocation(
+        id: locationId,
+        locationName: locationName,
+        description: description,
+      );
+    }
     final token = await _getToken(); // nếu bạn có login JWT
-    final url = Uri.parse(
-      "http://192.168.110.2/web_develop/fmcs/Backend/update_location.php",
-    );
+    final url = Uri.parse("$baseUrl/fmcs/Backend/update_location.php");
 
     final body = {
       "action": "update_location",
@@ -449,10 +481,11 @@ class FmcsApiService {
   static Future<Map<String, dynamic>> deleteLocation({
     required int locationId,
   }) async {
+    if (useMock) {
+      return MockLocationService.deleteLocation(locationId);
+    }
     final token = await _getToken(); // lấy token nếu cần JWT
-    final url = Uri.parse(
-      "http://192.168.110.2/web_develop/fmcs/Backend/update_location.php",
-    );
+    final url = Uri.parse("$baseUrl/fmcs/Backend/update_location.php");
 
     final body = {
       "action": "delete_location",
@@ -483,7 +516,7 @@ class FmcsApiService {
     final token = await _getToken();
     final response = await http.get(
       Uri.parse(
-        "http://192.168.110.2/web_develop/fmcs/api_action.php?action=list_actions_for_approval&approval=all",
+        "$baseUrl/fmcs/api_action.php?action=list_actions_for_approval&approval=all",
       ),
       headers: {if (token != null) "Authorization": "Bearer $token"},
     );
@@ -501,7 +534,7 @@ class FmcsApiService {
   static Future<List<ActionPlann>> fetchPlans(int actionId) async {
     final response = await http.get(
       Uri.parse(
-        "http://192.168.110.2/web_develop/fmcs/api_action.php?action=get_action_info&action_id=$actionId",
+        "$baseUrl/fmcs/api_action.php?action=get_action_info&action_id=$actionId",
       ),
     );
 
@@ -522,7 +555,7 @@ class FmcsApiService {
     required String value,
   }) async {
     final url = Uri.parse(
-      "http://192.168.110.2/web_develop/fmcs/api_action.php?action=set_action_approval",
+      "$baseUrl/fmcs/api_action.php?action=set_action_approval",
     );
     final token = await _getToken();
     final response = await http.post(
@@ -545,9 +578,7 @@ class FmcsApiService {
     required int actionId,
     required String reason,
   }) async {
-    final url = Uri.parse(
-      "http://192.168.110.2/web_develop/fmcs/api_action.php?action=delete_action",
-    );
+    final url = Uri.parse("$baseUrl/fmcs/api_action.php?action=delete_action");
     final token = await _getToken();
     final response = await http.post(
       url,
@@ -572,7 +603,7 @@ class FmcsApiService {
     try {
       final response = await client!
           .get(
-            Uri.parse('$baseUrl/api/fmcs/devices/system/$systemType'),
+            Uri.parse('$baseUrl/cmms/api/fmcs/devices/system/$systemType'),
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json',
@@ -598,7 +629,7 @@ class FmcsApiService {
     try {
       final response = await client!
           .get(
-            Uri.parse('$baseUrl/api/fmcs/devices/location/$location'),
+            Uri.parse('$baseUrl/cmms/api/fmcs/devices/location/$location'),
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json',
@@ -624,7 +655,7 @@ class FmcsApiService {
     try {
       final response = await client!
           .get(
-            Uri.parse('$baseUrl/api/fmcs/devices/$deviceId'),
+            Uri.parse('$baseUrl/cmms/api/fmcs/devices/$deviceId'),
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json',

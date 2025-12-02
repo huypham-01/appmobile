@@ -1729,7 +1729,7 @@ class _UserImageWidget extends StatelessWidget {
   // ) async {
   //   try {
   //     final url = Uri.parse(
-  //       '$baseUrl/cip3/index.php?c=WorkingInstructionController&m=delete_image&path=${Uri.encodeComponent(item.imageUrl!)}',
+  //       '$baseUrl/cmms/cip3/index.php?c=WorkingInstructionController&m=delete_image&path=${Uri.encodeComponent(item.imageUrl!)}',
   //     );
 
   //     final response = await http.get(url);
@@ -1775,7 +1775,7 @@ class _UserImageWidget extends StatelessWidget {
       final request = http.MultipartRequest(
         'POST',
         Uri.parse(
-          '$baseUrl/cip3/index.php?c=WorkingInstructionController&m=upload',
+          '$baseUrl/cmms/cip3/index.php?c=WorkingInstructionController&m=upload',
         ),
       );
       request.files.add(
@@ -1855,7 +1855,7 @@ class _NavigationFooter extends StatelessWidget {
                     backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
                   ),
-                  child: Text(AppLocalizations.of(context)!.submit),
+                  child: Text(AppLocalizations.of(context)!.next),
                 )
               else
                 ElevatedButton(
@@ -2227,23 +2227,23 @@ class _NavigationFooter extends StatelessWidget {
   //     ),
   //   );
   // }
-  Future<void> _showSuccessDialog(BuildContext context) async {
-    await showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("Success"),
-        content: const Text("Form submitted successfully."),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context, rootNavigator: true).pop();
-            },
-            child: const Text("OK"),
-          ),
-        ],
-      ),
-    );
-  }
+  // Future<void> _showSuccessDialog(BuildContext context) async {
+  //   await showDialog(
+  //     context: context,
+  //     builder: (_) => AlertDialog(
+  //       title: const Text("Success"),
+  //       content: const Text("Form submitted successfully."),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () {
+  //             Navigator.of(context, rootNavigator: true).pop();
+  //           },
+  //           child: const Text("OK"),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 }
 
 // Empty state widget

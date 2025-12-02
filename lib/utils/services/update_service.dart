@@ -1,55 +1,63 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:mobile/l10n/generated/app_localizations.dart';
+import 'package:mobile/utils/constants.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:open_filex/open_filex.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class UpdateService {
-  // URL của file version.json trên server của bạn
-  // static const String versionUrl = 'https://your-domain.com/version.json';
+  static const String apiUrl =
+      '$baseUrl/landing-page/app_vcm/backend/?c=File&m=listApps&q=SMART-FACTORY';
 
-  /// Hàm chính để kiểm tra update
   static Future<void> checkForUpdate(BuildContext context) async {
     try {
-      // 1. Lấy thông tin version hiện tại của App
       PackageInfo packageInfo = await PackageInfo.fromPlatform();
       String currentVersion = packageInfo.version;
 
-      // 2. Gọi API lấy thông tin version mới nhất
       var dio = Dio();
-      // var response = await dio.get(versionUrl);
+      var response = await dio.get(apiUrl);
 
-      if (2 != 2) {
-        // Map<String, dynamic> data = response.data;
-        // String newVersion = data['version'];
-        // String apkUrl = data['url'];
-        // String description = data['description'] ?? "Có bản cập nhật mới.";
+      if (response.statusCode != 200) return;
 
-        // 3. So sánh version (Logic đơn giản, bạn có thể viết hàm so sánh kỹ hơn)
-        if (true) {
-          // 4. Hiển thị Popup
-          _showUpdateDialog(
-            context,
-            "http://192.168.110.2/web_develop/landing-page/smart-factory.apk",
-            "1.0.1",
-            "testttt desc",
-          );
-        }
+      List data = response.data;
+      if (data.isEmpty) return;
+
+      var item = data.first;
+      String newVersion = item["version"];
+      String apkUrl = item["url"];
+
+      if (_isNewerVersion(currentVersion, newVersion)) {
+        _showUpdateDialog(
+          context,
+          apkUrl,
+          newVersion,
+          AppLocalizations.of(context)!.updateDescription,
+        );
       }
-    } catch (e) {
-      print("Lỗi kiểm tra update: $e");
+    } catch (e, s) {
+      print("❌ Lỗi kiểm tra update: $e");
+      print(s);
     }
   }
 
-  // Hàm so sánh version đơn giản (VD: "1.0.0" vs "1.0.1")
   static bool _isNewerVersion(String current, String newVer) {
-    // Có thể dùng logic tách chuỗi dấu chấm để so sánh chính xác hơn
-    return current != newVer;
+    List<int> c = _parseVer(current);
+    List<int> n = _parseVer(newVer);
+
+    for (int i = 0; i < 3; i++) {
+      if (n[i] > c[i]) return true;
+      if (n[i] < c[i]) return false;
+    }
+    return false;
   }
 
-  /// Hiển thị Popup xác nhận cập nhật
+  static List<int> _parseVer(String v) {
+    List<String> p = v.split(".");
+    while (p.length < 3) p.add("0");
+    return p.map((e) => int.tryParse(e) ?? 0).toList();
+  }
+
   static void _showUpdateDialog(
     BuildContext context,
     String url,
@@ -58,65 +66,82 @@ class UpdateService {
   ) {
     showDialog(
       context: context,
-      barrierDismissible: false, // Bắt buộc người dùng chọn
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: Text("Cập nhật phiên bản $version"),
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        title: Text(
+          AppLocalizations.of(context)!.updateDialogTitle(version),
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         content: Text(desc),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text("Để sau"),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.blue, // Màu xanh để giống liên kết
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              // Không có backgroundColor để không trông như nút
+            ),
+            child: Text(AppLocalizations.of(context)!.updateLater),
           ),
           ElevatedButton(
             onPressed: () {
-              Navigator.pop(context); // Đóng dialog cũ
-              _showDownloadProgress(context, url); // Mở dialog download
+              Navigator.pop(context);
+              _showDownloadProgress(context, url);
             },
-            child: Text("Cập nhật ngay"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.grey[300],
+              foregroundColor: Colors.black87,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+            child: Text(AppLocalizations.of(context)!.updateNow),
           ),
         ],
       ),
     );
   }
 
-  /// Màn hình/Dialog hiển thị tiến trình tải và cài đặt
   static void _showDownloadProgress(BuildContext context, String url) {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) {
+        bool isDownloading = false;
         double progress = 0.0;
-        String progressText = "Đang chuẩn bị...";
 
         return StatefulBuilder(
           builder: (context, setState) {
-            // Bắt đầu tải ngay khi Dialog mở
-            if (progress == 0.0) {
-              _downloadAndInstall(
-                "http://192.168.110.2/web_develop/landing-page/smart-factory.apk",
-                (received, total) {
+            if (!isDownloading) {
+              isDownloading = true;
+
+              _downloadAndInstall(url, (received, total) {
+                if (total > 0) {
                   setState(() {
                     progress = received / total;
-                    progressText =
-                        "Đang tải: ${(progress * 100).toStringAsFixed(0)}%";
                   });
+                }
 
-                  // Nếu tải xong (100%)
-                  if (progress >= 1.0) {
-                    Navigator.pop(context); // Đóng dialog
-                  }
-                },
-              );
+                if (progress >= 1) {
+                  Navigator.pop(context);
+                }
+              });
             }
 
             return AlertDialog(
-              title: Text("Đang tải xuống..."),
+              title: Text(AppLocalizations.of(context)!.downloadingTitle),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   LinearProgressIndicator(value: progress),
                   SizedBox(height: 10),
-                  Text(progressText),
+                  Text("${(progress * 100).toStringAsFixed(0)}%"),
                 ],
               ),
             );
@@ -126,38 +151,20 @@ class UpdateService {
     );
   }
 
-  /// Logic tải file và gọi lệnh cài đặt
   static Future<void> _downloadAndInstall(
     String url,
     Function(int, int) onProgress,
   ) async {
     try {
-      // Xin quyền lưu trữ (cho Android < 10, Android 10+ tự động quản lý scoped storage)
-      var status = await Permission.storage.status;
-      if (!status.isGranted) {
-        await Permission.storage.request();
-      }
+      Directory dir = Directory('/storage/emulated/0/Download');
+      String savePath = "${dir.path}/smart_factory_update.apk";
 
-      // Xác định đường dẫn lưu file tạm
-      // Lưu ý: Dùng getExternalStorageDirectory trên Android để file có thể truy cập bởi Installer
-      Directory? dir = await getExternalStorageDirectory();
-      if (dir == null)
-        dir = await getApplicationDocumentsDirectory(); // Fallback
-
-      String savePath = "${dir.path}/new_version.apk";
-
-      // Tải file
       Dio dio = Dio();
       await dio.download(url, savePath, onReceiveProgress: onProgress);
 
-      // Tải xong -> Mở file để cài đặt
-      print("Tải xong tại: $savePath");
-
-      // OpenFilex tự động xử lý FileProvider và Intent
-      final result = await OpenFilex.open(savePath);
-      print("Kết quả mở file: ${result.type} - ${result.message}");
+      await OpenFilex.open(savePath);
     } catch (e) {
-      print("Lỗi tải file: $e");
+      print("❌ Lỗi tải file: $e");
     }
   }
 }

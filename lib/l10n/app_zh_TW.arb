@@ -85,7 +85,7 @@
   "creator": "建立者",
   "actionplans": "行動計劃",
   "addplan": "新增行動計劃",
-  "actionid": "行動計劃編號",
+  "actionid": "操作編號",
   "plannedcompletiondate": "計劃完成日期",
   "owner": "負責人",
   "cancel": "取消",
@@ -337,6 +337,18 @@
 
   "tabIssue": "問題",
   "statusConnected": "連接",
-  "statusDisconnected": "已斷開"
+  "statusDisconnected": "已斷開",
+
+  "updateAvailableTitle": "有新的更新可用！",
+  "updateDialogTitle": "更新 {version}",
+  "updateDescription": "有新的更新可用！",
+  "updateLater": "稍後",
+  "updateNow": "立即更新",
+  "downloadingTitle": "正在下載...",
+
+  "cmmsDescription": "電腦化維護管理系統",
+  "emsDescription": "設備管理系統",
+  "fmcsDescription": "設施管理控制系統",
+  "appVersion": "版本 {appVersion}"
 
 }
