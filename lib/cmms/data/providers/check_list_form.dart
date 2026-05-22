@@ -18,8 +18,41 @@ class ChecklistFormNotifier extends ChangeNotifier {
   String get wiCode => _wiCode;
   String get uuid => _uuid;
 
-  FormStepModel? get currentStep =>
-      _currentStepIndex < _steps.length ? _steps[_currentStepIndex] : null;
+  FormStepModel? get currentStep {
+    if (_steps.isEmpty) return null;
+
+    // Có Preparation
+    if (preparationStep != null) {
+      if (_currentStepIndex == 0) {
+        return preparationStep;
+      } else {
+        final index = _currentStepIndex - 1;
+        if (index < normalSteps.length) {
+          return normalSteps[index];
+        }
+      }
+    }
+
+    // Không có Preparation
+    if (_currentStepIndex < normalSteps.length) {
+      return normalSteps[_currentStepIndex];
+    }
+
+    return null;
+  }
+
+  FormStepModel? get preparationStep {
+    for (final step in _steps) {
+      if (step.preparation == true) {
+        return step;
+      }
+    }
+    return null;
+  }
+
+  List<FormStepModel> get normalSteps {
+    return _steps.where((step) => step.preparation != true).toList();
+  }
 
   List<FormItemModel> get allAnswerableItems {
     return _steps
@@ -278,7 +311,7 @@ class ChecklistFormNotifier extends ChangeNotifier {
     return {"uuid": _uuid, "wiCode": _wiCode, "schema": schema};
   }
 
-  Future<bool> submitForm(String keyW,) async {
+  Future<bool> submitForm(String keyW) async {
     if (!isFormValid) {
       debugPrint("Form chưa hoàn thành!");
       return false;

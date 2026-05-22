@@ -244,11 +244,31 @@ class UserImageModel extends FormItemModel {
   bool get isAnswered => imageUrl != null;
 }
 
+// class FormStepModel {
+//   final int stepIndex;
+//   final List<FormItemModel> items;
+
+//   FormStepModel({required this.stepIndex, required this.items});
+
+//   factory FormStepModel.fromJson(Map<String, dynamic> json) {
+//     final itemsJson = json['items'] ?? json['formItems'] ?? [];
+//     final items = (itemsJson as List)
+//         .map((item) => FormItemModel.fromJson(item))
+//         .toList();
+
+//     return FormStepModel(stepIndex: json['stepIndex'] ?? 1, items: items);
+//   }
+// }
 class FormStepModel {
   final int stepIndex;
+  final bool preparation;
   final List<FormItemModel> items;
 
-  FormStepModel({required this.stepIndex, required this.items});
+  FormStepModel({
+    required this.stepIndex,
+    required this.preparation,
+    required this.items,
+  });
 
   factory FormStepModel.fromJson(Map<String, dynamic> json) {
     final itemsJson = json['items'] ?? json['formItems'] ?? [];
@@ -256,7 +276,11 @@ class FormStepModel {
         .map((item) => FormItemModel.fromJson(item))
         .toList();
 
-    return FormStepModel(stepIndex: json['stepIndex'] ?? 1, items: items);
+    return FormStepModel(
+      stepIndex: json['stepIndex'] ?? 1,
+      preparation: json['preparation'] ?? false,
+      items: items,
+    );
   }
 }
 

@@ -15,7 +15,9 @@ class PermissionHelper {
   /// --------------------------------------------------------
   /// 1) QUYỀN THÔNG BÁO (ANDROID 13+ và iOS)
   /// --------------------------------------------------------
-  static Future<void> _requestNotificationPermission(BuildContext context) async {
+  static Future<void> _requestNotificationPermission(
+    BuildContext context,
+  ) async {
     if (!Platform.isAndroid && !Platform.isIOS) return;
 
     var status = await Permission.notification.status;
@@ -40,21 +42,23 @@ class PermissionHelper {
   static Future<void> _requestExactAlarmPermission(BuildContext context) async {
     if (!Platform.isAndroid) return;
 
-    final bool? canSchedule =
-        await _channel.invokeMethod("canScheduleExactAlarms");
+    try {
+      final bool? canSchedule = await _channel.invokeMethod(
+        "canScheduleExactAlarms",
+      );
 
-    if (canSchedule == true) {
-      print("Exact Alarm already allowed");
-      return;
+      if (canSchedule == true) return;
+
+      _showDialog(
+        context,
+        title: "Allow Exact Alarm",
+        message:
+            "We need exact alarm permission to notify you exactly at 7:00 AM and 7:00 PM.",
+        action: () => _channel.invokeMethod("openExactAlarmSettings"),
+      );
+    } catch (e) {
+      debugPrint("Exact alarm not supported: $e");
     }
-
-    _showDialog(
-      context,
-      title: "Allow Exact Alarm",
-      message:
-          "We need exact alarm permission to notify you exactly at 7:00 AM and 7:00 PM.",
-      action: () => _channel.invokeMethod("openExactAlarmSettings"),
-    );
   }
 
   /// --------------------------------------------------------

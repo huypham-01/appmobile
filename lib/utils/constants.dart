@@ -473,52 +473,66 @@ class VttParser {
   static List<SubtitleCue> parseVttContent(String vttContent) {
     final List<SubtitleCue> cues = [];
 
-    // Chia content thành các dòng
-    final lines = vttContent.split('\n').map((line) => line.trim()).toList();
+    final lines = vttContent.replaceAll('\r\n', '\n').split('\n');
 
-    // Bỏ qua header "WEBVTT"
     int i = 0;
-    while (i < lines.length && !lines[i].contains('-->')) {
-      i++;
-    }
 
-    // Parse từng cue
     while (i < lines.length) {
-      // Tìm dòng có timestamp (format: 00:00.000 --> 00:20.000)
-      if (lines[i].contains('-->')) {
-        try {
-          final timeParts = lines[i].split('-->');
-          if (timeParts.length == 2) {
-            final startTime = _parseTimestamp(timeParts[0].trim());
-            final endTime = _parseTimestamp(timeParts[1].trim());
+      final line = lines[i].trim();
 
-            // Thu thập tất cả text lines cho cue này
-            final List<String> textLines = [];
-            i++; // Di chuyển đến dòng text đầu tiên
+      // Skip empty lines, WEBVTT header
+      if (line.isEmpty || line == 'WEBVTT') {
+        i++;
+        continue;
+      }
 
-            // Đọc tất cả text lines cho đến khi gặp dòng trống hoặc timestamp tiếp theo
-            while (i < lines.length &&
-                lines[i].isNotEmpty &&
-                !lines[i].contains('-->')) {
-              textLines.add(lines[i]);
-              i++;
-            }
-
-            // Ghép tất cả text lines thành một cue
-            if (textLines.isNotEmpty) {
-              final text = textLines.join('\n');
-              cues.add(
-                SubtitleCue(startTime: startTime, endTime: endTime, text: text),
-              );
-            }
-          }
-        } catch (e) {
-          print('Error parsing cue at line ${i + 1}: $e');
+      // Skip STYLE block
+      if (line == 'STYLE') {
+        i++;
+        while (i < lines.length && lines[i].trim().isNotEmpty) {
           i++;
         }
-      } else {
-        i++;
+        continue;
       }
+
+      // Detect timestamp line
+      if (line.contains('-->')) {
+        try {
+          final parts = line.split('-->');
+
+          final startTime = _parseTimestamp(parts[0].trim());
+
+          // 👇 lấy endTime trước khoảng trắng đầu tiên
+          final endTimeRaw = parts[1].trim().split(' ').first;
+          final endTime = _parseTimestamp(endTimeRaw);
+
+          i++;
+
+          final textLines = <String>[];
+
+          // Collect subtitle text
+          while (i < lines.length &&
+              lines[i].trim().isNotEmpty &&
+              !lines[i].contains('-->')) {
+            textLines.add(lines[i].trim());
+            i++;
+          }
+
+          if (textLines.isNotEmpty) {
+            cues.add(
+              SubtitleCue(
+                startTime: startTime,
+                endTime: endTime,
+                text: textLines.join('\n'),
+              ),
+            );
+          }
+        } catch (e) {
+          print('❌ Error parsing cue at line $i: $e');
+        }
+      }
+
+      i++;
     }
 
     return cues;

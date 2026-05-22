@@ -95,8 +95,16 @@ class _ProgressIndicator extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  // Text(
+                  //   '${AppLocalizations.of(context)!.step} ${notifier.currentStepIndex + 1} / ${notifier.steps.length}',
+                  //   style: const TextStyle(fontWeight: FontWeight.w600),
+                  // ),
                   Text(
-                    '${AppLocalizations.of(context)!.step} ${notifier.currentStepIndex + 1} / ${notifier.steps.length}',
+                    notifier.preparationStep != null &&
+                            notifier.currentStepIndex == 0
+                        ? 'Preparation'
+                        : '${AppLocalizations.of(context)!.step} '
+                              '${notifier.currentStepIndex} / ${notifier.normalSteps.length}',
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   Text(

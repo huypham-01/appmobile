@@ -210,7 +210,7 @@ class ApiService {
       };
 
       final body = jsonEncode({
-        "uuid": decoded['sub'],
+        "userId": decoded['sub'],
         "username": decoded['username'],
         "roles": (decoded['role'] as List).map((r) => r['uuid']).toList(),
         "password": password,

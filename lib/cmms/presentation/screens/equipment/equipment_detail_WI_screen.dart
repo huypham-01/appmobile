@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile/l10n/generated/app_localizations.dart';
 import 'package:mobile/utils/constants.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 
 // ============ MODELS ============
@@ -238,9 +239,14 @@ class UserImageModel extends FormItemModel {
 
 class FormStepModel {
   final int stepIndex;
+  final bool preparation;
   final List<FormItemModel> items;
 
-  FormStepModel({required this.stepIndex, required this.items});
+  FormStepModel({
+    required this.stepIndex,
+    required this.preparation,
+    required this.items,
+  });
 
   factory FormStepModel.fromJson(Map<String, dynamic> json) {
     final itemsJson = json['items'] ?? json['formItems'] ?? [];
@@ -248,7 +254,11 @@ class FormStepModel {
         .map((item) => FormItemModel.fromJson(item))
         .toList();
 
-    return FormStepModel(stepIndex: json['stepIndex'] ?? 1, items: items);
+    return FormStepModel(
+      stepIndex: json['stepIndex'] ?? 1,
+      preparation: json['preparation'] ?? false,
+      items: items,
+    );
   }
 }
 
@@ -264,8 +274,28 @@ class ChecklistFormNotifier extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String get wiCode => _wiCode;
 
-  FormStepModel? get currentStep =>
-      _currentStepIndex < _steps.length ? _steps[_currentStepIndex] : null;
+  FormStepModel? get currentStep {
+    if (_steps.isEmpty) return null;
+
+    // Có Preparation
+    if (preparationStep != null) {
+      if (_currentStepIndex == 0) {
+        return preparationStep;
+      } else {
+        final index = _currentStepIndex - 1;
+        if (index < normalSteps.length) {
+          return normalSteps[index];
+        }
+      }
+    }
+
+    // Không có Preparation
+    if (_currentStepIndex < normalSteps.length) {
+      return normalSteps[_currentStepIndex];
+    }
+
+    return null;
+  }
 
   List<FormItemModel> get allAnswerableItems {
     return _steps
@@ -301,6 +331,34 @@ class ChecklistFormNotifier extends ChangeNotifier {
     if (item is MultipleChoiceModel) return item.isAnswered;
     if (item is UserImageModel) return item.isAnswered;
     return false;
+  }
+
+  bool get hasPreparation {
+    return steps.any((s) => s.preparation == true);
+  }
+
+  int get totalSteps => normalSteps.length;
+  int get displayStepNumber {
+    if (hasPreparation) {
+      // preparation = index 0
+      return _currentStepIndex;
+    } else {
+      // step thật bắt đầu từ 1
+      return _currentStepIndex + 1;
+    }
+  }
+
+  FormStepModel? get preparationStep {
+    for (final step in _steps) {
+      if (step.preparation == true) {
+        return step;
+      }
+    }
+    return null;
+  }
+
+  List<FormStepModel> get normalSteps {
+    return _steps.where((step) => step.preparation != true).toList();
   }
 
   // ✅ NEW: Load form từ schema data thay vì API
@@ -937,6 +995,8 @@ class _VideoPlayerWidgetState extends State<_VideoPlayerWidget> {
 
   bool _isInitialized = false;
   bool _hasError = false;
+  bool _isMuted = true;
+  double _volume = 1.0;
   String? _errorMessage;
 
   @override
@@ -945,17 +1005,43 @@ class _VideoPlayerWidgetState extends State<_VideoPlayerWidget> {
     _initializeVideo();
   }
 
+  Future<String?> _getSavedSubtitleLanguage(
+    Map<String, String> subtitles,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedLang = prefs.getString('selectedLanguage');
+
+    switch (savedLang) {
+      case 'English':
+        return subtitles.containsKey('en') ? 'en' : null;
+      case 'Vietnamese':
+        return subtitles.containsKey('vi') ? 'vi' : null;
+      case 'Chinese':
+        return subtitles.containsKey('zh') ? 'zh' : null;
+      case 'Taiwanese':
+        return subtitles.containsKey('zh') ? 'zh' : null;
+      default:
+        return null;
+    }
+  }
+
   Future<void> _initializeVideo() async {
     try {
       _controller = VideoPlayerController.networkUrl(
         Uri.parse(widget.videoUrl),
       );
       await _controller.initialize();
+      _isMuted = true;
+      await _controller.setVolume(0.0);
 
       // Khởi tạo custom subtitle controller
       if (widget.subtitles != null && widget.subtitles!.isNotEmpty) {
         _subs = widget.subtitles!;
-        _selectedLang = _subs!.containsKey('en') ? 'en' : _subs!.keys.first;
+        final savedLang = await _getSavedSubtitleLanguage(_subs!);
+        _selectedLang =
+            savedLang ?? (_subs!.containsKey('en') ? 'en' : _subs!.keys.first);
+
+        // _selectedLang = _subs!.containsKey('en') ? 'en' : _subs!.keys.first;
 
         _customSubtitleController = CustomSubtitleController();
         await _customSubtitleController!.loadFromUrl(_subs![_selectedLang]!);
@@ -1050,6 +1136,8 @@ class _VideoPlayerWidgetState extends State<_VideoPlayerWidget> {
           // Video controls
           _VideoControls(
             controller: _controller,
+            isMuted: _isMuted,
+            onToggleMute: _toggleMute,
             availableSubtitleLangs: _subs?.keys.toList(),
             selectedLang: _selectedLang,
             onSubtitleSelected: _changeSubtitleLang,
@@ -1057,6 +1145,26 @@ class _VideoPlayerWidgetState extends State<_VideoPlayerWidget> {
         ],
       ),
     );
+  }
+
+  Future<void> _toggleMute() async {
+    if (_isMuted) {
+      await _unmute();
+    } else {
+      await _mute();
+    }
+  }
+
+  Future<void> _mute() async {
+    _isMuted = true;
+    await _controller.setVolume(0.0);
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _unmute() async {
+    _isMuted = false;
+    await _controller.setVolume(_volume);
+    if (mounted) setState(() {});
   }
 
   Widget _loadingWidget() {
@@ -1125,6 +1233,8 @@ class _VideoPlayerWidgetState extends State<_VideoPlayerWidget> {
 ////// Controls với menu chọn subtitle
 class _VideoControls extends StatefulWidget {
   final VideoPlayerController controller;
+  final bool isMuted;
+  final VoidCallback onToggleMute;
   final List<String>? availableSubtitleLangs;
   final String? selectedLang;
   final ValueChanged<String>? onSubtitleSelected;
@@ -1132,6 +1242,8 @@ class _VideoControls extends StatefulWidget {
 
   const _VideoControls({
     required this.controller,
+    required this.isMuted,
+    required this.onToggleMute,
     this.availableSubtitleLangs,
     this.selectedLang,
     this.onSubtitleSelected,
@@ -1325,6 +1437,25 @@ class _VideoControlsState extends State<_VideoControls> {
                       const SizedBox(width: 40), // Spacer
                       Row(
                         children: [
+                          GestureDetector(
+                            onTap: widget.onToggleMute,
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.6),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Icon(
+                                widget.isMuted
+                                    ? Icons.volume_off
+                                    : Icons.volume_up,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(width: 12),
                           _buildSubtitleMenu(),
                           const SizedBox(width: 12),
                           GestureDetector(
@@ -1755,6 +1886,7 @@ class _FullscreenVideoPlayerState extends State<_FullscreenVideoPlayer> {
                                 ),
                               ),
                             ),
+
                             // Subtitle menu - đã thêm vào đây
                             _buildSubtitleMenu(),
                           ],
@@ -1964,9 +2096,17 @@ class _NavigationFooter extends StatelessWidget {
                 const SizedBox(width: 80),
 
               const Spacer(),
+              //TODO
 
+              // Text(
+              //   '${AppLocalizations.of(context)!.step} ${notifier.currentStepIndex + 1} / ${notifier.steps.length}',
+              //   style: const TextStyle(fontWeight: FontWeight.w600),
+              // ),
               Text(
-                '${AppLocalizations.of(context)!.step} ${notifier.currentStepIndex + 1} / ${notifier.steps.length}',
+                notifier.hasPreparation && notifier.currentStepIndex == 0
+                    ? 'Preparation'
+                    : '${AppLocalizations.of(context)!.step} '
+                          '${notifier.displayStepNumber} / ${notifier.totalSteps}',
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
 

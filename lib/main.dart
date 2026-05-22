@@ -76,11 +76,11 @@ class _MyAppState extends State<MyApp> {
     // ------------------------------------------------------------
     // 🔥 XIN QUYỀN LẦN ĐẦU CÀI APP (ĐÃ SỬA)
     // ------------------------------------------------------------
-    // if (widget.showOnboarding) {
-    //   WidgetsBinding.instance.addPostFrameCallback((_) {
-    //     PermissionHelper.requestAllPermissions(navigatorKey.currentContext!);
-    //   });
-    // }
+    if (widget.showOnboarding) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        PermissionHelper.requestAllPermissions(context);
+      });
+    }
 
     // ------------------------------------------------------------
     // 🔥 1) LOAD NGÔN NGỮ ĐÃ LƯU
@@ -136,15 +136,15 @@ class _MyAppState extends State<MyApp> {
     // ------------------------------------------------------------
     // Sử dụng addPostFrameCallback để đảm bảo App đã render xong màn hình Home
     // thì mới hiện popup update.
-    // WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   // Chỉ kiểm tra update nếu không phải deep link đổi mật khẩu (để tránh làm phiền)
-    //   if (startRoute == AppRoutes.home) {
-    //     // Sử dụng navigatorKey.currentContext để lấy context ở mọi nơi
-    //     if (navigatorKey.currentContext != null) {
-    //       UpdateService.checkForUpdate(navigatorKey.currentContext!);
-    //     }
-    //   }
-    // });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Chỉ kiểm tra update nếu không phải deep link đổi mật khẩu (để tránh làm phiền)
+      if (startRoute == AppRoutes.home) {
+        // Sử dụng navigatorKey.currentContext để lấy context ở mọi nơi
+        if (navigatorKey.currentContext != null) {
+          UpdateService.checkForUpdate(navigatorKey.currentContext!);
+        }
+      }
+    });
   }
 
   void _handleDeepLink(Uri uri) {
